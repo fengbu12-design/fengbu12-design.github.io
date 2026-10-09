@@ -1,0 +1,3044 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Macro Concepts · 全英记忆器</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f6f2ea; --bg-soft:#f0eaf0;
+  --card:#fffdf8; --card-2:#faf6ee;
+  --ink:#3d3833; --ink-2:#5f584f; --muted:#8f877c;
+  --line:#e8e0d3; --line-2:#f1eade;
+  --accent:#4d7c6a; --accent-2:#3a6b58;
+  --accent-soft:#e5efea; --accent-text:#3c6b57;
+  --warm:#b08968; --star:#d4a373;
+  --ok:#4a8a6a; --ok-soft:#e9f3ed; --ok-line:#c2dccb;
+  --danger:#b85c5c;
+  --shadow:0 1px 2px rgba(90,75,55,.05),0 2px 8px rgba(90,75,55,.045);
+  --shadow-lg:0 16px 44px rgba(90,75,55,.13);
+  --r:14px;
+}
+html[data-theme="dark"]{
+  --bg:#1a1816; --bg-soft:#211e1b;
+  --card:#262320; --card-2:#2b2825;
+  --ink:#e6e0d6; --ink-2:#c3bbb0; --muted:#8e867b;
+  --line:#38332e; --line-2:#2e2a26;
+  --accent:#7fb8a3; --accent-2:#9ecfb8;
+  --accent-soft:rgba(127,184,163,.14); --accent-text:#8fc9b3;
+  --warm:#c9a483; --star:#e0b584;
+  --ok:#7fb894; --ok-soft:rgba(127,184,148,.13); --ok-line:rgba(127,184,148,.3);
+  --danger:#d98b8b;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+  --shadow-lg:0 16px 44px rgba(0,0,0,.5);
+}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.75;font-size:15px;
+  transition:background .3s,color .3s;
+  padding-bottom:70px;
+}
+
+/* ============ 顶栏 ============ */
+.topbar{
+  position:sticky;top:0;z-index:60;
+  background:color-mix(in srgb,var(--bg) 90%,transparent);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+  padding:11px 18px;display:flex;align-items:center;gap:12px;
+}
+.brand{font-weight:800;font-size:14.5px;letter-spacing:-.1px;display:flex;align-items:center;gap:9px;white-space:nowrap}
+.brand::before{content:"";width:10px;height:10px;border-radius:3.5px;background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.brand small{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.4px}
+.spacer{flex:1}
+.prog{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.prog-bar{width:88px;height:5px;border-radius:99px;background:var(--line);overflow:hidden}
+.prog-bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:99px;transition:width .45s cubic-bezier(.3,1,.4,1)}
+.tbtn{
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  height:34px;padding:0 12px;border-radius:10px;font-family:inherit;
+  font-size:12.5px;font-weight:700;cursor:pointer;transition:.16s;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.tbtn:hover{border-color:var(--accent);color:var(--accent-text)}
+.tbtn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+.tbtn.has-voice::after{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--ok);margin-left:2px;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 22%,transparent);
+}
+.icon-btn{border:1px solid var(--line);background:var(--card);color:var(--ink-2);width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;cursor:pointer;font-family:inherit;transition:.16s;padding:0}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent-text)}
+@media(max-width:700px){
+  .brand small{display:none}
+  .prog-bar{width:46px}
+  .topbar{padding:9px 12px;gap:8px}
+  .tbtn{padding:0 9px;font-size:11.5px}
+}
+
+/* ============ 语音设置面板 ============ */
+.voice-panel{
+  position:fixed;top:64px;right:18px;z-index:120;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:15px 17px;box-shadow:var(--shadow-lg);
+  display:none;min-width:290px;max-width:min(360px,92vw);
+}
+.voice-panel.open{display:block;animation:popIn .22s cubic-bezier(.2,.9,.3,1.15)}
+@keyframes popIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vp-title{
+  font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:var(--accent-text);margin-bottom:12px;display:flex;align-items:center;gap:7px;
+}
+.vp-title::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.vp-row{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.vp-row:last-child{margin-bottom:0}
+.vp-label{
+  font-size:10.5px;font-weight:800;color:var(--muted);letter-spacing:.5px;
+  text-transform:uppercase;min-width:52px;flex:none;
+}
+.vp-select{
+  flex:1;font-family:inherit;font-size:12.5px;font-weight:600;
+  padding:8px 11px;border-radius:9px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);cursor:pointer;outline:none;
+  min-width:0;max-width:100%;
+  transition:.16s;
+}
+.vp-select:hover{border-color:var(--accent)}
+.vp-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.vp-hint{
+  font-size:11px;color:var(--muted);font-weight:600;line-height:1.55;
+  background:var(--card-2);border-radius:8px;padding:8px 11px;margin-top:11px;
+  display:flex;gap:7px;align-items:flex-start;
+}
+.vp-hint .ic{flex:none;font-size:12px;line-height:1.55;opacity:.75}
+.vp-btn{
+  width:100%;font-family:inherit;font-size:12px;font-weight:700;
+  padding:9px;border-radius:9px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink-2);cursor:pointer;transition:.16s;
+}
+.vp-btn:hover{border-color:var(--accent);color:var(--accent-text);background:var(--accent-soft)}
+.vp-btn.playing{background:var(--danger);border-color:var(--danger);color:#fffdf8}
+.vp-btn.playing:hover{filter:brightness(.94);color:#fffdf8;background:var(--danger)}
+
+/* ============ 工具栏 ============ */
+.toolbar{max-width:1040px;margin:0 auto;padding:18px 16px 0;display:flex;flex-direction:column;gap:12px}
+.tabs{display:flex;gap:5px;background:var(--card-2);border:1px solid var(--line);border-radius:13px;padding:5px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  flex:1;min-width:80px;border:0;background:transparent;color:var(--muted);
+  font-family:inherit;font-size:13px;font-weight:700;padding:9px 10px;border-radius:9px;
+  cursor:pointer;transition:.16s;white-space:nowrap;
+}
+.tabs button:hover{color:var(--accent-text);background:var(--accent-soft)}
+.tabs button.active{background:var(--accent);color:#fffdf8;box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 30%,transparent)}
+html[data-theme="dark"] .tabs button.active{color:#1a1816}
+
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.search{flex:1;min-width:190px;position:relative}
+.search input{
+  width:100%;font-family:inherit;font-size:13.5px;font-weight:600;
+  padding:10px 14px 10px 37px;border-radius:11px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);outline:none;transition:.16s;
+}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search input::placeholder{color:var(--muted);font-weight:500}
+.search::before{content:"🔍";position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.5;pointer-events:none}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  border:1px solid var(--line);background:var(--card);color:var(--muted);
+  font-family:inherit;font-size:12px;font-weight:700;padding:7px 13px;
+  border-radius:99px;cursor:pointer;transition:.16s;white-space:nowrap;
+}
+.chip:hover{border-color:var(--accent);color:var(--accent-text)}
+.chip.active{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent-text)}
+.chip .n{opacity:.6;font-size:11px;margin-left:4px;font-variant-numeric:tabular-nums}
+
+/* ============ 主区 ============ */
+main{max-width:1040px;margin:0 auto;padding:20px 16px 40px}
+
+.ghead{
+  display:flex;align-items:center;gap:10px;margin:28px 0 13px;
+  font-size:11.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);
+}
+.ghead:first-child{margin-top:8px}
+.ghead .bar{width:3px;height:13px;border-radius:2px;background:linear-gradient(180deg,var(--accent),var(--accent-2))}
+.ghead .cnt{background:var(--accent-soft);color:var(--accent-text);padding:2px 8px;border-radius:99px;font-size:10.5px;letter-spacing:0}
+
+/* ---- 浏览卡 ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px}
+.bc{
+  position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:17px 18px 16px;cursor:pointer;transition:.18s;box-shadow:var(--shadow);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.bc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),var(--accent-2));opacity:0;transition:.18s}
+.bc:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 32%,var(--line));box-shadow:0 10px 28px rgba(90,75,55,.11)}
+.bc:hover::before{opacity:1}
+.bc.done{background:var(--ok-soft);border-color:var(--ok-line)}
+.bc.done::before{opacity:1;background:linear-gradient(180deg,var(--ok),#6bb08c)}
+.bc-top{display:flex;align-items:flex-start;gap:9px;margin-bottom:10px}
+.bc-num{
+  flex:none;font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums;
+  background:var(--accent-soft);color:var(--accent-text);padding:3px 8px;border-radius:6px;letter-spacing:.5px;
+  margin-top:2px;
+}
+.bc.done .bc-num{background:color-mix(in srgb,var(--ok) 17%,transparent);color:var(--ok)}
+.bc-names{flex:1;min-width:0}
+.bc-en{font-size:15px;font-weight:750;line-height:1.4;letter-spacing:-.1px;color:var(--ink)}
+.bc-cn{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px}
+.bc-def{
+  font-size:13px;line-height:1.72;color:var(--ink-2);font-weight:500;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  margin-bottom:11px;
+}
+.bc-def .kw{color:var(--accent-text);font-weight:700}
+.bc-fml{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  font-size:11px;color:var(--muted);background:var(--card-2);
+  padding:6px 9px;border-radius:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:10px;
+}
+.bc-foot{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:10px;border-top:1px dashed var(--line-2)}
+.bc-hint{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.3px}
+.bc-edited{
+  font-size:10px;font-weight:800;color:var(--star);
+  background:color-mix(in srgb,var(--star) 15%,transparent);
+  padding:2px 7px;border-radius:99px;letter-spacing:.3px;line-height:1.4;
+}
+.spacer{flex:1}
+.star{font-size:13px;opacity:.22;cursor:pointer;transition:.16s;padding:2px;line-height:1}
+.star:hover{opacity:.75;transform:scale(1.18)}
+.star.on{opacity:1;color:var(--star)}
+.tick{
+  flex:none;width:22px;height:22px;border-radius:50%;border:1.8px solid var(--line);
+  display:grid;place-items:center;font-size:11px;color:transparent;transition:.16s;cursor:pointer;background:var(--card);
+  font-family:inherit;padding:0;
+}
+.tick:hover{border-color:var(--ok);color:var(--ok)}
+.bc.done .tick{background:var(--ok);border-color:var(--ok);color:#fffdf8}
+
+/* ---- 背诵卡 ---- */
+.stage{display:flex;flex-direction:column;align-items:center;gap:16px}
+.fc{width:100%;max-width:660px;perspective:2000px;cursor:pointer;user-select:none}
+.fc-in{display:grid;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.4,.12,.2,1)}
+.fc.flipped .fc-in{transform:rotateY(180deg)}
+.fc-face{
+  grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:34px 32px;box-shadow:var(--shadow-lg);min-height:400px;
+  display:flex;flex-direction:column;
+}
+.fc-back{transform:rotateY(180deg);overflow-y:auto;max-height:76vh}
+.fc-front{align-items:center;justify-content:center;text-align:center;gap:18px}
+.fc-badge{
+  font-size:10.5px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;
+  color:var(--accent-text);background:var(--accent-soft);padding:5px 14px;border-radius:99px;
+}
+.fc-en{font-size:27px;font-weight:800;letter-spacing:-.6px;line-height:1.28;color:var(--ink)}
+.fc-cn{font-size:14px;color:var(--muted);font-weight:600}
+.fc-prompt{
+  font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.4px;
+  margin-top:8px;opacity:.85;
+}
+.fc-prompt::before{content:"— "}
+.fc-prompt::after{content:" —"}
+.fc-sec{margin-bottom:17px}
+.fc-sec:last-of-type{margin-bottom:0}
+.fc-label{
+  font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:var(--accent-text);margin-bottom:7px;display:flex;align-items:center;gap:6px;
+}
+.fc-label::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.fc-def{
+  font-size:14.5px;line-height:1.85;color:var(--ink);font-weight:500;
+  font-family:Georgia,"Times New Roman","Songti SC",serif;
+}
+.fc-def .kw{
+  color:var(--accent-text);font-weight:700;
+  background:linear-gradient(180deg,transparent 64%,var(--accent-soft) 64%);
+  padding:0 2px;border-radius:2px;
+}
+.fc-cn-def{font-size:13px;line-height:1.8;color:var(--ink-2)}
+.fc-tipbox{
+  background:color-mix(in srgb,var(--star) 11%,transparent);
+  border:1px solid color-mix(in srgb,var(--star) 26%,transparent);
+  border-radius:11px;padding:12px 15px;font-size:13.5px;font-weight:650;
+  color:var(--ink);line-height:1.72;
+}
+.fc-fml{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;
+  background:var(--accent-soft);color:var(--accent-text);
+  padding:12px 16px;border-radius:11px;word-break:break-word;line-height:1.65;
+}
+.fc-ctrl{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center;width:100%;max-width:660px}
+.counter{font-size:12.5px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;padding:0 4px}
+.dots{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:660px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s;cursor:pointer}
+.dots i.done{background:var(--ok)}
+.dots i.cur{background:var(--accent);transform:scale(1.55)}
+
+/* ---- 按钮 ---- */
+.btn{
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  font-family:inherit;font-size:13px;font-weight:700;padding:10px 18px;border-radius:11px;
+  cursor:pointer;transition:.16s;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:6px;justify-content:center;
+}
+.btn:hover{border-color:var(--accent);color:var(--accent-text);background:var(--accent-soft)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn:disabled:hover{border-color:var(--line);color:var(--ink-2);background:var(--card)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fffdf8;box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 28%,transparent)}
+.btn.primary:hover{filter:brightness(.94);color:#fffdf8;background:var(--accent)}
+html[data-theme="dark"] .btn.primary{color:#1a1816}
+html[data-theme="dark"] .btn.primary:hover{color:#1a1816}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fffdf8}
+.btn.ok:hover{filter:brightness(.94);color:#fffdf8;background:var(--ok)}
+html[data-theme="dark"] .btn.ok{color:#1a1816}
+html[data-theme="dark"] .btn.ok:hover{color:#1a1816}
+.btn.warn{border-color:color-mix(in srgb,var(--danger) 35%,var(--line));color:var(--danger)}
+.btn.warn:hover{background:color-mix(in srgb,var(--danger) 9%,transparent);border-color:var(--danger);color:var(--danger)}
+.btn.ghost{background:transparent}
+.btn.speak.playing{background:var(--danger);border-color:var(--danger);color:#fffdf8}
+.btn.speak.playing:hover{background:var(--danger);filter:brightness(.94);color:#fffdf8;border-color:var(--danger)}
+
+/* ---- 挖空 ---- */
+.cloze-wrap{max-width:700px;margin:0 auto}
+.cloze-card{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:30px 32px;box-shadow:var(--shadow-lg);
+}
+.cloze-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.cloze-num{
+  font-size:10.5px;font-weight:800;letter-spacing:.6px;
+  background:var(--accent-soft);color:var(--accent-text);padding:3px 9px;border-radius:6px;
+}
+.cloze-en{font-size:19px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
+.cloze-cn{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:18px}
+
+.cloze-density{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;padding:11px 15px;border-radius:12px;
+  background:var(--card-2);border:1px solid var(--line-2);
+}
+.density-label{
+  font-size:10.5px;font-weight:800;color:var(--muted);
+  letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;flex:none;
+}
+.density-range{
+  flex:1;accent-color:var(--accent);height:5px;cursor:pointer;min-width:80px;
+}
+.density-value{
+  font-size:13.5px;font-weight:800;color:var(--accent-text);
+  font-variant-numeric:tabular-nums;min-width:46px;text-align:right;flex:none;
+}
+.density-info{
+  font-size:11px;color:var(--muted);font-weight:600;
+  min-width:58px;text-align:right;flex:none;font-variant-numeric:tabular-nums;
+}
+
+.cloze-body{
+  font-family:Georgia,"Times New Roman","Songti SC",serif;
+  font-size:16px;line-height:2.15;color:var(--ink);font-weight:500;
+}
+.cloze-body .kw{
+  color:var(--accent-text);font-weight:700;
+  background:linear-gradient(180deg,transparent 64%,var(--accent-soft) 64%);
+  padding:0 2px;border-radius:2px;
+}
+.blank{
+  display:inline-block;min-width:2.5em;
+  border-bottom:1.5px dotted color-mix(in srgb,var(--accent) 55%,transparent);
+  margin:0 3px;padding:0 5px 1px;cursor:pointer;
+  color:transparent;transition:.22s;border-radius:4px 4px 0 0;
+  text-align:center;vertical-align:baseline;
+}
+.blank:hover{background:var(--accent-soft)}
+.blank.on{
+  color:var(--accent-text);font-weight:700;
+  border-bottom-color:transparent;background:var(--accent-soft);
+}
+.cloze-bar{display:flex;gap:9px;margin-top:22px;padding-top:18px;border-top:1px dashed var(--line-2);flex-wrap:wrap;align-items:center}
+.cloze-stat{font-size:12px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;margin-left:auto}
+
+/* ---- 默写 ---- */
+.write-wrap{max-width:720px;margin:0 auto}
+.write-top{display:flex;align-items:center;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+.write-score{font-size:12px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums;margin-left:auto}
+.write-qcard{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:28px 30px;box-shadow:var(--shadow);margin-bottom:14px;text-align:center;
+  position:relative;
+}
+.write-qcard::before{
+  content:"WRITE THE DEFINITION";
+  position:absolute;top:11px;left:50%;transform:translateX(-50%);
+  font-size:9.5px;font-weight:800;letter-spacing:1.4px;color:var(--muted);opacity:.75;
+}
+.write-term{
+  font-size:26px;font-weight:800;letter-spacing:-.5px;color:var(--ink);
+  margin:20px 0 6px;line-height:1.28;
+}
+.write-cn{font-size:13px;color:var(--muted);font-weight:600}
+.write-hintline{
+  font-size:11px;color:var(--muted);font-weight:600;margin-top:12px;letter-spacing:.3px;opacity:.85;
+  font-family:Georgia,"Times New Roman",serif;
+}
+.write-area{
+  width:100%;min-height:210px;resize:vertical;
+  font-family:Georgia,"Times New Roman","Songti SC",serif;
+  font-size:15px;line-height:1.9;color:var(--ink);
+  padding:18px 20px;border-radius:14px;
+  border:1.5px solid var(--line);background:var(--card);outline:none;transition:.16s;
+}
+.write-area:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.write-area::placeholder{color:var(--muted);font-weight:500;font-size:13.5px;font-family:inherit}
+.write-area:disabled{background:var(--card-2);opacity:.85;color:var(--ink-2)}
+.write-actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.write-tip{font-size:11.5px;color:var(--muted);font-weight:600;margin-left:auto;letter-spacing:.2px}
+
+.result-card{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:22px 24px;box-shadow:var(--shadow);margin-bottom:14px;
+}
+.result-score{
+  display:flex;align-items:center;gap:12px;padding-bottom:15px;margin-bottom:16px;
+  border-bottom:1px dashed var(--line-2);flex-wrap:wrap;
+}
+.score-badge{
+  font-size:13.5px;font-weight:800;padding:6px 15px;border-radius:99px;
+  background:var(--accent-soft);color:var(--accent-text);font-variant-numeric:tabular-nums;
+  letter-spacing:.2px;
+}
+.score-badge.high{background:var(--ok-soft);color:var(--ok)}
+.score-badge.mid{background:color-mix(in srgb,var(--star) 18%,transparent);color:#a8742a}
+html[data-theme="dark"] .score-badge.mid{color:var(--star)}
+.score-badge.low{background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--danger)}
+.score-msg{font-size:12.5px;color:var(--muted);font-weight:600}
+.result-label{
+  font-size:10px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;
+  color:var(--accent-text);margin-bottom:9px;display:flex;align-items:center;gap:7px;
+}
+.result-label::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.standard-def{
+  font-size:15px;line-height:1.95;color:var(--ink);font-weight:500;
+  font-family:Georgia,"Times New Roman","Songti SC",serif;
+  margin-bottom:20px;
+}
+.standard-def .kw{
+  color:var(--accent-text);font-weight:700;
+  background:linear-gradient(180deg,transparent 64%,var(--accent-soft) 64%);
+  padding:0 2px;border-radius:2px;
+}
+.kw-list{display:flex;flex-direction:column;gap:7px}
+.kw-item{
+  display:flex;align-items:center;gap:11px;font-size:13px;
+  padding:9px 13px;border-radius:10px;background:var(--card-2);font-weight:600;
+  line-height:1.5;
+}
+.kw-item.hit{background:var(--ok-soft);color:var(--ok)}
+html[data-theme="dark"] .kw-item.hit{color:var(--ok)}
+.kw-item.miss{background:color-mix(in srgb,var(--danger) 8%,transparent);color:var(--danger)}
+.kw-mark{
+  flex:none;width:20px;height:20px;border-radius:50%;
+  display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;
+  background:var(--muted);
+}
+.kw-item.hit .kw-mark{background:var(--ok)}
+.kw-item.miss .kw-mark{background:var(--danger)}
+.kw-text{flex:1;min-width:0}
+
+/* ---- 空态 ---- */
+.empty{text-align:center;padding:70px 20px;color:var(--muted)}
+.empty .big{font-size:46px;margin-bottom:14px;opacity:.55}
+.empty h3{margin:0 0 7px;font-size:16px;color:var(--ink);font-weight:750}
+.empty p{margin:0;font-size:13px}
+
+/* ---- toast ---- */
+.toast{
+  position:fixed;left:50%;bottom:30px;transform:translate(-50%,22px);
+  background:var(--ink);color:var(--bg);padding:11px 23px;border-radius:99px;
+  font-size:13px;font-weight:700;opacity:0;pointer-events:none;
+  transition:.3s cubic-bezier(.2,.9,.3,1.2);z-index:500;white-space:nowrap;
+  box-shadow:0 12px 32px rgba(60,48,35,.25);max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:640px){
+  .fc-face{padding:26px 22px;min-height:350px}
+  .fc-en{font-size:22px}
+  .fc-def{font-size:14px;line-height:1.8}
+  .mtitle{font-size:20px}
+  .cloze-card{padding:24px 20px}
+  .cloze-body{font-size:15px;line-height:2}
+  .cloze-density{padding:9px 12px;gap:9px}
+  .density-label{font-size:10px}
+  .density-info{display:none}
+  .grid{grid-template-columns:1fr}
+  .voice-panel{right:12px;left:12px;min-width:0;max-width:none}
+  .write-qcard{padding:24px 20px}
+  .write-term{font-size:21px}
+  .result-card{padding:19px 20px}
+  .standard-def{font-size:14px}
+}
+
+/* =========================================================
+   详情弹窗
+   ========================================================= */
+.overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(40,32,22,.42);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:48px 18px 40px;
+  overflow-y:auto;
+  opacity:0;pointer-events:none;
+  transition:opacity .22s ease;
+}
+html[data-theme="dark"] .overlay{background:rgba(0,0,0,.62)}
+.overlay.open{opacity:1;pointer-events:auto}
+
+.modal{
+  position:relative;width:100%;max-width:620px;
+  background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:var(--shadow-lg);
+  padding:30px 32px 26px;
+  transform:translateY(12px) scale(.985);opacity:0;
+  transition:transform .26s cubic-bezier(.2,.9,.3,1.1),opacity .22s;
+}
+.overlay.open .modal{transform:none;opacity:1}
+
+.mclose{
+  position:absolute;top:16px;right:16px;
+  width:32px;height:32px;border-radius:9px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink-2);
+  font-family:inherit;font-size:14px;font-weight:700;
+  display:grid;place-items:center;cursor:pointer;transition:.16s;
+}
+.mclose:hover{border-color:var(--danger);color:var(--danger);background:color-mix(in srgb,var(--danger) 8%,transparent)}
+
+.mhead{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.mbadge{
+  font-size:10.5px;font-weight:800;letter-spacing:.5px;
+  background:var(--accent-soft);color:var(--accent-text);
+  padding:4px 10px;border-radius:99px;
+}
+.mbadge.g{background:var(--card-2);color:var(--muted)}
+.mbadge.st{background:color-mix(in srgb,var(--star) 18%,transparent);color:var(--star)}
+.mbadge.ed{background:color-mix(in srgb,var(--star) 18%,transparent);color:var(--star)}
+
+.mtitle{
+  margin:0 0 5px;font-size:23px;font-weight:800;letter-spacing:-.5px;
+  line-height:1.3;color:var(--ink);padding-right:36px;
+}
+.men{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:16px}
+
+.msec{margin-top:18px}
+.mlabel{
+  font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:var(--accent-text);margin-bottom:8px;display:flex;align-items:center;gap:7px;
+}
+.mlabel::after{content:"";flex:1;height:1px;background:var(--line-2)}
+.mdef{
+  font-size:15px;line-height:1.9;color:var(--ink);font-weight:500;
+  font-family:Georgia,"Times New Roman","Songti SC",serif;
+}
+.mdef .kw{
+  color:var(--accent-text);font-weight:700;
+  background:linear-gradient(180deg,transparent 64%,var(--accent-soft) 64%);
+  padding:0 2px;border-radius:2px;
+}
+.mcn{font-size:13.5px;line-height:1.85;color:var(--ink-2)}
+.mtip{
+  display:flex;gap:9px;align-items:flex-start;
+  background:color-mix(in srgb,var(--star) 11%,transparent);
+  border:1px solid color-mix(in srgb,var(--star) 26%,transparent);
+  border-radius:11px;padding:11px 14px;
+  font-size:13.5px;font-weight:650;line-height:1.7;color:var(--ink);
+}
+.mtip .ic{flex:none;font-size:13px;line-height:1.7}
+.mfml{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px;line-height:1.7;
+  background:var(--accent-soft);color:var(--accent-text);
+  padding:12px 15px;border-radius:11px;word-break:break-word;
+}
+.macts{
+  display:flex;gap:9px;flex-wrap:wrap;
+  margin-top:24px;padding-top:18px;border-top:1px dashed var(--line-2);
+}
+
+/* ---- 编辑器 ---- */
+.edit-field{margin-bottom:14px}
+.edit-field:last-of-type{margin-bottom:0}
+.edit-label{
+  display:flex;align-items:center;gap:8px;
+  font-size:10.5px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--accent-text);margin-bottom:6px;
+}
+.edit-label .tag{
+  font-size:9.5px;font-weight:700;letter-spacing:.3px;text-transform:none;
+  background:var(--card-2);color:var(--muted);padding:2px 7px;border-radius:99px;
+}
+.edit-input,.edit-area,.edit-select{
+  width:100%;font-family:inherit;font-size:13.5px;font-weight:600;
+  padding:9px 12px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);outline:none;transition:.16s;
+  line-height:1.6;
+}
+.edit-input:focus,.edit-area:focus,.edit-select:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);
+}
+.edit-area{
+  resize:vertical;min-height:80px;
+  font-family:Georgia,"Times New Roman","Songti SC",serif;
+  font-size:13.5px;line-height:1.75;
+}
+.edit-area.mono{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px;
+}
+.edit-hint{
+  font-size:11px;color:var(--muted);font-weight:600;margin-top:5px;
+  line-height:1.55;
+}
+.edit-hint code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;background:var(--accent-soft);color:var(--accent-text);
+  padding:1px 5px;border-radius:4px;
+}
+.edit-row{display:flex;gap:10px}
+.edit-row > .edit-field{flex:1;min-width:0}
+@media(max-width:640px){ .edit-row{flex-direction:column;gap:0} }
+
+@media(max-width:640px){
+  .overlay{padding:24px 12px 30px}
+  .modal{padding:24px 20px 22px}
+  .mtitle{font-size:19px}
+  .mdef{font-size:14px;line-height:1.85}
+  .macts .btn{flex:1;min-width:120px}
+}
+
+/* =========================================================
+   计划页
+   ========================================================= */
+.plan-wrap{max-width:860px;margin:0 auto}
+
+.plan-hero{
+  position:relative;overflow:hidden;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 13%,var(--card)) 0%,var(--card) 65%);
+  border:1px solid var(--line);border-radius:16px;
+  padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow);
+}
+.plan-hero h2{
+  margin:0 0 6px;font-size:20px;font-weight:800;letter-spacing:-.4px;color:var(--ink);
+  display:flex;align-items:center;gap:9px;
+}
+.plan-hero p{margin:0;font-size:13px;color:var(--ink-2);font-weight:600;line-height:1.7}
+.plan-prog-row{display:flex;align-items:center;gap:12px;margin-top:15px}
+.plan-prog-row .prog-bar{width:auto;flex:1;height:7px}
+.plan-prog-text{
+  font-size:12.5px;font-weight:800;color:var(--accent-text);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+
+.day-tabs{
+  display:flex;gap:5px;background:var(--card-2);
+  border:1px solid var(--line);border-radius:13px;padding:5px;margin-bottom:16px;
+}
+.day-tabs button{
+  flex:1;border:0;background:transparent;color:var(--muted);
+  font-family:inherit;font-size:13px;font-weight:700;padding:9px 8px;border-radius:9px;
+  cursor:pointer;transition:.16s;white-space:nowrap;
+}
+.day-tabs button:hover{color:var(--accent-text);background:var(--accent-soft)}
+.day-tabs button.active{
+  background:var(--accent);color:#fffdf8;
+  box-shadow:0 3px 12px color-mix(in srgb,var(--accent) 30%,transparent);
+}
+html[data-theme="dark"] .day-tabs button.active{color:#1a1816}
+
+.block-card{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:17px 20px;margin-bottom:12px;box-shadow:var(--shadow);
+}
+.block-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.block-time{
+  font-size:10.5px;font-weight:800;letter-spacing:.5px;
+  background:var(--accent-soft);color:var(--accent-text);
+  padding:4px 11px;border-radius:99px;white-space:nowrap;flex:none;
+}
+.block-title{font-size:14.5px;font-weight:750;color:var(--ink);letter-spacing:-.1px}
+.block-cnt{
+  margin-left:auto;font-size:11px;font-weight:800;color:var(--muted);
+  font-variant-numeric:tabular-nums;
+  background:var(--card-2);padding:3px 10px;border-radius:99px;flex:none;
+}
+
+.check-list{display:flex;flex-direction:column}
+.check-item{
+  display:flex;gap:11px;align-items:flex-start;
+  padding:9px 0;border-bottom:1px dashed var(--line-2);
+  cursor:pointer;user-select:none;transition:.14s;
+  font-size:13.5px;line-height:1.7;color:var(--ink-2);font-weight:500;
+}
+.check-item:last-child{border-bottom:0}
+.check-item:hover .ci-box{border-color:var(--accent)}
+.ci-box{
+  flex:none;width:19px;height:19px;border-radius:6px;
+  border:1.8px solid var(--line);background:var(--card);
+  display:grid;place-items:center;font-size:11px;font-weight:900;
+  color:transparent;transition:.16s;margin-top:2px;
+}
+.check-item.done{color:var(--muted)}
+.check-item.done .ci-text{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--muted) 45%,transparent)}
+.check-item.done .ci-box{background:var(--ok);border-color:var(--ok);color:#fffdf8}
+.ci-text{flex:1;min-width:0}
+.ci-text code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12px;font-weight:700;
+  background:var(--accent-soft);color:var(--accent-text);
+  padding:1px 6px;border-radius:5px;white-space:nowrap;
+}
+.ci-text b{color:var(--ink);font-weight:800}
+
+.plan-actions{
+  display:flex;gap:9px;justify-content:center;
+  margin-top:22px;flex-wrap:wrap;
+}
+
+@media(max-width:640px){
+  .plan-hero{padding:18px 18px}
+  .plan-hero h2{font-size:17.5px}
+  .block-card{padding:15px 16px}
+  .check-item{font-size:13px}
+  .plan-actions .btn{flex:1;min-width:130px}
+}
+
+/* =========================================================
+   PDF 阅读器
+   ========================================================= */
+.pdf-wrap{width:100%}
+
+.pdf-drop{
+  border:2px dashed var(--line);border-radius:18px;background:var(--card);
+  padding:60px 24px;text-align:center;cursor:pointer;transition:.18s;
+  display:flex;flex-direction:column;align-items:center;gap:11px;
+}
+.pdf-drop:hover,.pdf-drop.drag{border-color:var(--accent);background:var(--accent-soft)}
+.pdf-drop .pd-ic{font-size:46px;line-height:1;opacity:.8}
+.pdf-drop h3{margin:0;font-size:16.5px;font-weight:800;color:var(--ink)}
+.pdf-drop p{margin:0;font-size:12.5px;color:var(--muted);font-weight:600;line-height:1.7;max-width:430px}
+.pdf-drop .btn{margin-top:8px}
+
+.pdf-bar{
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  border:1px solid var(--line);border-radius:13px;
+  padding:9px 13px;margin-bottom:14px;box-shadow:var(--shadow);
+  position:sticky;top:58px;z-index:40;
+  background:color-mix(in srgb,var(--card) 93%,transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.pdf-badge{
+  font-size:10px;font-weight:800;letter-spacing:.8px;
+  background:var(--danger);color:#fffdf8;padding:3px 8px;border-radius:6px;flex:none;
+}
+.pdf-fname{
+  font-size:13px;font-weight:750;color:var(--ink);
+  max-width:min(44vw,320px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.pdf-meta{font-size:11.5px;font-weight:700;color:var(--muted);flex:none}
+.pdf-zoom-val{
+  font-size:12px;font-weight:800;color:var(--ink-2);font-variant-numeric:tabular-nums;
+  min-width:44px;text-align:center;
+}
+
+.pdf-pages{
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  padding:4px 0 30px;
+}
+.pdf-page{
+  background:#fff;border-radius:6px;overflow:hidden;
+  box-shadow:0 2px 10px rgba(60,48,35,.13),0 10px 30px rgba(60,48,35,.08);
+  line-height:0;
+}
+.pdf-page canvas{display:block;max-width:none}
+.pdf-ph{background:var(--card-2);width:100%;animation:phPulse 1.6s ease-in-out infinite}
+@keyframes phPulse{0%,100%{opacity:.5}50%{opacity:.92}}
+.pdf-err{
+  padding:40px 20px;font-size:12.5px;font-weight:700;color:var(--danger);
+  background:var(--card-2);line-height:1.6;text-align:center;
+}
+html[data-theme="dark"] .pdf-page{
+  box-shadow:0 2px 10px rgba(0,0,0,.45),0 10px 30px rgba(0,0,0,.4);
+}
+@media(max-width:640px){
+  .pdf-bar{top:52px;padding:8px 10px;gap:7px}
+  .pdf-fname{max-width:38vw}
+  .pdf-drop{padding:44px 18px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">Macro Concepts <small>33 · EN MEMORY</small></div>
+  <div class="spacer"></div>
+  <div class="prog">
+    <div class="prog-bar"><i id="progFill"></i></div>
+    <span id="progText">0/33</span>
+  </div>
+  <button class="tbtn" id="cnToggle" title="显示/隐藏中文辅助">中</button>
+  <button class="tbtn" id="voiceBtn" title="TTS 语音设置">🔊 语音</button>
+  <button class="icon-btn" id="themeBtn" title="切换主题">🌗</button>
+</header>
+
+<div class="voice-panel" id="voicePanel">
+  <div class="vp-title">TTS 语音设置</div>
+  <div class="vp-row">
+    <span class="vp-label">引擎</span>
+    <select class="vp-select" id="voiceSelect"><option>加载中…</option></select>
+  </div>
+  <div class="vp-row">
+    <span class="vp-label">语速</span>
+    <select class="vp-select" id="rateSelect">
+      <option value="0.6">0.6x 慢速</option>
+      <option value="0.75">0.75x</option>
+      <option value="0.85">0.85x 默认</option>
+      <option value="1">1.0x 正常</option>
+      <option value="1.15">1.15x</option>
+      <option value="1.3">1.3x 快速</option>
+    </select>
+  </div>
+  <div class="vp-row">
+    <button class="vp-btn" id="vpTest">🔊 试听当前语音</button>
+  </div>
+  <div class="vp-hint">
+    <span class="ic">ℹ️</span>
+    <span>建议选择 <b>en-US</b> 或 <b>en-GB</b> 的本地语音，朗读最清晰。选择会自动保存。</span>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="tabs" id="tabs">
+    <button data-mode="browse">📖 浏览</button>
+    <button data-mode="recall">🧠 背诵</button>
+    <button data-mode="cloze">✍️ 挖空</button>
+    <button data-mode="write">📝 默写</button>
+    <button data-mode="plan">🗓 计划</button>
+    <button data-mode="pdf">📄 PDF</button>
+  </div>
+  <div class="row" id="toolRow"></div>
+</div>
+
+<main id="view"></main>
+<div class="overlay" id="overlay"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   数据
+   ========================================================= */
+const GROUPS = { A:'GDP 核算与物价', B:'生产函数与经济增长', C:'跨期选择与消费', D:'市场均衡与短期波动' };
+
+const BASE_CONCEPTS = [
+{ id:1, g:'A', cn:'实际GDP vs. 名义GDP', en:'Real vs. Nominal GDP',
+  enDef:'**Nominal GDP** is the market value of all final goods and services produced in an economy in a given period, valued at **current prices**. **Real GDP** is the same measure but valued at **constant base-year prices**, adjusting for **inflation** to reflect true output.',
+  cnDef:'名义GDP是按当前价格计算的产出总值；实际GDP是按基期不变价格计算，剔除了物价变动影响后的产出。',
+  tip:'名义看钱（票面价值），实际看货（真实产量）。',
+  fml:'Real GDP = (Nominal GDP / GDP Deflator) × 100' },
+
+{ id:2, g:'A', cn:'生产法、收入法、支出法', en:'Production, Income, Expenditure Approach',
+  enDef:'Three **equivalent methods** to measure GDP. The **production approach** sums **value added**; the **income approach** sums all incomes earned (wages, rents, profits); the **expenditure approach** sums total spending on final goods and services.',
+  cnDef:'核算GDP的三种等价方法：生产法（各部门增加值）、收入法（要素报酬）、支出法（最终产品总支出）。',
+  tip:'造出来（生产）、赚到手（收入）、花出去（支出），三方等价。',
+  fml:'GDP = C + I + G + (X − M)' },
+
+{ id:3, g:'A', cn:'GDP平减指数', en:'GDP Deflator',
+  enDef:'A measure of the **overall price level** calculated as the ratio of **nominal GDP** to **real GDP**, reflecting the prices of all domestically produced goods and services in the economy.',
+  cnDef:'衡量整体物价水平的指标，是名义GDP与实际GDP的比率，涵盖了国内生产的所有最终产品。',
+  tip:'宏观通胀尺，看整体物价涨跌。',
+  fml:'GDP Deflator = (Nominal GDP / Real GDP) × 100' },
+
+{ id:4, g:'B', cn:'代表性个体', en:'Representative Agent',
+  enDef:'A **modeling simplification** in macroeconomics assuming the economy consists of **identical individuals** making **optimal decisions**, allowing the **aggregation** of individual behavior into a single representative consumer or firm.',
+  cnDef:'宏观模型中的简化假设，假设经济由完全相同且理性最优决策的个体组成，将全社会行为加总为单个个体行为。',
+  tip:'把全社会当成一个人，方便建模和推导。',
+  fml:'无（概念性假设）' },
+
+{ id:5, g:'B', cn:'规模报酬不变', en:'Constant Returns to Scale',
+  enDef:'A property of a **production function** where if all inputs are scaled by a constant factor (λ), output increases by the **exact same proportion**. It implies the production function is **linearly homogeneous**.',
+  cnDef:'生产函数的一种性质：所有投入同比例增加，产出也按相同比例增加。',
+  tip:'投入翻倍，产出刚好翻倍。',
+  fml:'F(λK, λL) = λ·F(K, L)' },
+
+{ id:6, g:'B', cn:'资本/劳动的边际产量', en:'Marginal Product of Capital / Labor',
+  enDef:'The **additional output** produced by employing one more unit of **capital (MPK)** or **labor (MPL)**, holding all other inputs constant.',
+  cnDef:'在其他投入不变的情况下，增加一单位资本（或劳动）所带来的额外产出。',
+  tip:'多雇一个人 / 多买一台机器，能多赚多少。',
+  fml:'MPL = ∂Y/∂L ;  MPK = ∂Y/∂K' },
+
+{ id:7, g:'B', cn:'资本/劳动边际报酬递减', en:'Diminishing Returns to Capital / Labor',
+  enDef:'The principle that as more of one input is added while others are held constant, the **marginal product** of that input will eventually **decrease**.',
+  cnDef:'其他投入不变，连续增加某一种投入，其边际产量最终会逐渐下降。',
+  tip:'一个坑里种树，种太多树反而长不好（多雇人反而效率变低）。',
+  fml:'∂²Y/∂L² < 0 ;  ∂²Y/∂K² < 0' },
+
+{ id:8, g:'B', cn:'稳态', en:'Steady State',
+  enDef:'In the **Solow growth model**, a long-run equilibrium where **capital per effective worker** and **output per effective worker** are constant because **investment equals depreciation** (and dilution from population growth / tech progress).',
+  cnDef:'索洛模型中，人均资本和人均产出保持不变的长期均衡状态。此时投资刚好弥补折旧。',
+  tip:'攒钱投资刚好够补折旧，资本存量不再变。',
+  fml:'Δk = 0  或  s·f(k) = (n + g + δ)·k' },
+
+{ id:9, g:'B', cn:'黄金律', en:'Golden Rule',
+  enDef:'The steady state that **maximizes consumption per worker**. It occurs where the **marginal product of capital** equals the sum of **population growth**, **technological progress**, and **depreciation**.',
+  cnDef:'使人均消费达到最大化的稳态资本水平，是政策制定者追求的最优目标。',
+  tip:'让老百姓消费最爽、最完美的那一个稳态点。',
+  fml:"MPK = n + g + δ  （即 f'(k) = n + g + δ）" },
+
+{ id:10, g:'B', cn:'动态无效率', en:'Dynamic Inefficiency',
+  enDef:'A situation where an economy has accumulated so much capital (above the **Golden Rule level**) that reducing the capital stock would increase consumption in every period. The **marginal product of capital** is less than the **growth rate plus depreciation**.',
+  cnDef:'资本存量超过黄金律水平，导致减少资本反而能增加所有时期的消费，储蓄过度了。',
+  tip:'攒钱攒太多不消费，反而亏了。过度储蓄！',
+  fml:"MPK < n + g + δ  （或 f'(k) < n + g + δ）" },
+
+{ id:11, g:'B', cn:'劳动增强型生产率', en:'Labor-augmenting Productivity',
+  enDef:'Technological progress that increases the **efficiency of labor**. It effectively increases the amount of **effective labor** in the production function, allowing output to grow even if the physical number of workers remains constant.',
+  cnDef:'以提高劳动效率为特征的技术进步。它相当于成倍增加了“有效劳动”的数量，即使工人人数不变，产出也能增加。',
+  tip:'技术进步让一个工人能顶过去两个用。',
+  fml:'Y = F(K, A·L)   （A·L 为有效劳动）' },
+
+{ id:12, g:'B', cn:'绝对收敛与条件收敛', en:'Convergence (Absolute & Conditional)',
+  enDef:'**Absolute convergence** predicts poorer economies grow faster than richer ones and eventually converge to the **same income level** (assuming identical structural parameters). **Conditional convergence** predicts economies converge to their **own steady states**, meaning poorer countries only catch up if they have similar **savings rates, population growth, and technology**.',
+  cnDef:'绝对收敛指穷国比富国增长快，最终人均收入趋于一致（假设结构参数完全相同）。条件收敛指各国收敛于各自的稳态，只有结构特征（如储蓄率、人口增长率）相似的国家才会趋同。',
+  tip:'绝对收敛是“大家一起跑，终点都一样”；条件收敛是“各回各家，但穷家往往跑得快”。',
+  fml:'Δy/y = β·(y* − y)' },
+
+{ id:13, g:'B', cn:'全要素生产率', en:'Total Factor Productivity (TFP)',
+  enDef:'A measure of the **efficiency** with which inputs (capital and labor) are used in production, often interpreted as the level of **technology or efficiency**. It captures the portion of output growth not explained by input increases (the **Solow residual**).',
+  cnDef:'衡量资本和劳动等要素投入转化为产出的效率，通常代表技术水平。它捕捉了产出增长中无法被要素投入增加所解释的部分（即索洛余量）。',
+  tip:'同样的锅和菜，大厨（TFP）做出来的就是更好吃。',
+  fml:'Y = A·F(K, L) ;  ΔA/A = ΔY/Y − α·ΔK/K − (1−α)·ΔL/L' },
+
+{ id:14, g:'C', cn:'边际效用', en:'Marginal Utility',
+  enDef:'The **additional satisfaction** or benefit derived from consuming **one more unit** of a good or service.',
+  cnDef:'消费者每增加一单位商品或服务消费所获得的额外满足感。',
+  tip:'多喝一口水，多出来的爽感。',
+  fml:"MU = ΔU/ΔC  或  U'(C)" },
+
+{ id:15, g:'C', cn:'边际效用递减', en:'Diminishing Marginal Utility',
+  enDef:'The principle that as consumption of a good increases, the **marginal utility** derived from consuming an additional unit **decreases**, holding other factors constant.',
+  cnDef:'随着消费量的增加，每增加一单位消费所带来的额外满足感是递减的。',
+  tip:'饿了吃第一个包子最香，吃到第五个就撑了。',
+  fml:"U''(C) < 0   （效用函数二阶导小于零）" },
+
+{ id:16, g:'C', cn:'贴现因子', en:'Discount Factor',
+  enDef:'A factor (typically denoted as **β**, between 0 and 1) representing the **degree of patience**. It is used to calculate the **present value** of future utility or income. A higher β means the individual cares more about the future.',
+  cnDef:'衡量消费者耐心程度的参数（通常在0到1之间），用于把未来的效用或收入折算成今天的现值。β越大，越看重未来。',
+  tip:'未来的钱和快乐，今天看来都得打个折。',
+  fml:'β = 1 / (1 + ρ)   （ρ 为主观时间偏好率）' },
+
+{ id:17, g:'C', cn:'跨期预算约束', en:'Intertemporal Budget Constraint',
+  enDef:"The limit on **total lifetime consumption**, stating that the **present discounted value** of an individual's lifetime consumption cannot exceed their **initial wealth** plus the present discounted value of their **lifetime income**.",
+  cnDef:'消费者一生消费的现值不能超过其初始财富加上一生劳动收入的现值。',
+  tip:'这辈子赚多少钱（现值），就最多只能花多少钱（现值），不能透支一辈子。',
+  fml:'c₁ + c₂/(1+r) = Y₁ + Y₂/(1+r)' },
+
+{ id:18, g:'C', cn:'欧拉方程', en:'Euler Equation',
+  enDef:'The **first-order condition** for optimal intertemporal consumption choice. It states that the **marginal utility of consuming today** equals the **discounted marginal utility of consuming tomorrow**, adjusted for the **interest rate**. It describes the optimal **consumption smoothing** path.',
+  cnDef:'跨期最优消费的一阶条件。即今天消费的边际效用，等于明天消费边际效用的贴现（经过利率调整）。它描述了消费者平滑消费的最优路径。',
+  tip:'今天少喝一杯奶茶（损失效用），明天多喝一杯（获得效用），两边爽感得一样（考虑利率和耐心后）。',
+  fml:"U'(cₜ) = β(1+r)·U'(cₜ₊₁)" },
+
+{ id:19, g:'C', cn:'消费函数', en:'Consumption Function',
+  enDef:"A mathematical function relating **total consumption expenditure** to **disposable income** (and sometimes other factors like wealth or interest rates). In the **Keynesian framework**, it's typically c = c₀ + cY.",
+  cnDef:'描述消费支出与可支配收入（及其他因素）之间关系的函数。',
+  tip:'赚得多就花得多（但不会全花光）。',
+  fml:'c = a + b·y_d   （a 为自发消费，b 为 MPC）' },
+
+{ id:20, g:'C', cn:'消费平滑', en:'Consumption Smoothing',
+  enDef:'The economic behavior where individuals prefer to maintain a **relatively stable path of consumption** over their lifetime, rather than consuming a lot in high-income periods and very little in low-income periods, by **saving and borrowing**.',
+  cnDef:'消费者倾向于通过储蓄和借贷，在一生中保持相对稳定的消费路径，而不是随着收入的波动而剧烈波动。',
+  tip:'丰年存粮荒年吃，一辈子消费水平稳如老狗。',
+  fml:'基于欧拉方程，消费者倾向于让 cₜ = cₜ₊₁' },
+
+{ id:21, g:'C', cn:'替代效应（跨期）', en:'Substitution Effect (Intertemporal)',
+  enDef:'In intertemporal choice, when the **interest rate rises**, **current consumption** becomes more expensive relative to **future consumption**. This encourages individuals to **substitute away from current consumption towards future consumption** (i.e., save more).',
+  cnDef:'在跨期选择中，利率上升使得当前消费相对于未来消费变得更贵，促使人们减少当前消费，增加储蓄，用未来消费替代当前消费。',
+  tip:'利息高了，存钱更划算，今天少花明天多花。',
+  fml:'与欧拉方程相关，利率 r 上升通过替代效应倾向于降低当前消费 cₜ。' },
+
+{ id:22, g:'C', cn:'收入效应（跨期）', en:'Income Effect (Intertemporal)',
+  enDef:'In intertemporal choice, a rise in the interest rate makes a **net saver wealthier** because their **future interest income** increases. This may lead them to increase consumption in both the present and the future.',
+  cnDef:'利率上升使得净储蓄者未来的利息收入增加，感觉自己变富有了，从而可能增加当前和未来的消费。',
+  tip:'利息多了，感觉自己有钱了，今天也多花点。',
+  fml:'与替代效应方向相反，利率上升通过收入效应倾向于增加当前消费 cₜ。' },
+
+{ id:23, g:'C', cn:'边际消费倾向', en:'Marginal Propensity to Consume (MPC)',
+  enDef:'The **proportion** of an additional unit of **disposable income** that is spent on **consumption** rather than saved. It is a key parameter in the **Keynesian consumption function**, typically between 0 and 1.',
+  cnDef:'每增加一单位可支配收入中用于消费的比例（而不是储蓄）。它是凯恩斯消费函数的关键参数，通常在0到1之间。',
+  tip:'多赚一块钱，舍得花掉几毛。',
+  fml:'MPC = ΔC / ΔY_d   （在 c = a + b·y_d 中，b 就是 MPC）' },
+
+{ id:24, g:'C', cn:'暂时性 vs. 持久性收入冲击', en:'Transitory vs. Permanent Income Shocks',
+  enDef:'A **transitory shock** is a temporary fluctuation in income (e.g., a one-time bonus), while a **permanent shock** is a long-term change (e.g., a promotion). According to the **permanent income hypothesis**, consumption responds strongly to permanent shocks but very little to transitory shocks.',
+  cnDef:'暂时性冲击指收入短暂波动（如一次性奖金），持久性冲击指收入永久性变化（如升职加薪）。根据持久收入假说，消费对持久性冲击反应大，对暂时性冲击反应极小。',
+  tip:'发一次年终奖（暂时）不太敢乱花，涨了工资（持久）才敢换大房子。',
+  fml:'消费对暂时性冲击的边际反应接近 0，对持久性冲击的反应接近 1。' },
+
+{ id:25, g:'C', cn:'持久收入假说', en:'Permanent Income Hypothesis',
+  enDef:'Proposed by **Milton Friedman**, this theory states that an individual\u2019s consumption is determined not by their **current income**, but by their **permanent income** — the average income they expect to earn over their lifetime.',
+  cnDef:'弗里德曼提出，消费者的消费支出主要取决于其“持久收入”（一生的平均预期收入），而不是当前的暂时性收入。',
+  tip:'看长远，不看一时得失。',
+  fml:'c = γ · Yᴾ   （Yᴾ 为持久收入，γ 为常数比例）' },
+
+{ id:26, g:'C', cn:'借贷约束 / 流动性约束', en:'Borrowing Constraint',
+  enDef:'A limit on how much an individual can **borrow against future income**. When **binding**, it prevents consumers from achieving their optimal **consumption smoothing** path, forcing current consumption to depend on **current income**.',
+  cnDef:'限制消费者借贷能力的约束。当约束生效时，消费者无法实现跨期消费平滑，当期消费只能受限于当期收入。',
+  tip:'想借钱花？银行不批！只能看菜下饭。',
+  fml:'cₜ ≤ yₜ + wₜ   （当期消费不能超过当期收入加初始财富）' },
+
+{ id:27, g:'D', cn:'竞争性均衡', en:'Competitive Equilibrium',
+  enDef:'A state of the economy where, given prices, every consumer **maximizes utility**, every firm **maximizes profit**, and all markets **clear simultaneously**.',
+  cnDef:'在给定价格下，每个消费者实现效用最大化，每个厂商实现利润最大化，且所有市场同时出清的状态。',
+  tip:'大家都满意，市场刚好清空。',
+  fml:'由最优化条件（如 MR = MRT）与市场出清条件（如 S = D）共同构成。' },
+
+{ id:28, g:'D', cn:'市场出清', en:'Market Clearing',
+  enDef:'The economic condition where **supply equals demand** in a market, implying there is no **excess supply or excess demand**. Prices are assumed to be **fully flexible** to achieve this.',
+  cnDef:'供给等于需求的状态，没有超额供给或超额需求，假设价格完全弹性。',
+  tip:'要多少有多少，刚好卖光。',
+  fml:'S(p) = D(p)' },
+
+{ id:29, g:'D', cn:'合意总支出', en:'Desired Aggregate Expenditure',
+  enDef:'The total amount of goods and services that households, firms, the government, and foreigners **plan or desire to purchase** at a given level of income. It drives **short-run output fluctuations**.',
+  cnDef:'家庭、企业、政府和外国人计划或愿意购买的商品和服务总量。它是驱动短期产出波动的关键。',
+  tip:'打算花出去的钱，决定短期经济冷热。',
+  fml:'AE = C + Iᵖ + G + NX   （Iᵖ 为计划投资）' },
+
+{ id:30, g:'D', cn:'自发支出', en:'Autonomous Expenditure',
+  enDef:'The component of aggregate expenditure that **does not depend on** the current level of income, such as **autonomous consumption**, **planned investment**, **government spending**, and **exports**.',
+  cnDef:'不依赖于当前收入水平的支出部分，如自发消费、计划投资、政府购买和出口。',
+  tip:'不管赚不赚钱，都必须花的钱。',
+  fml:'A = C₀ + I + G + NX   （在凯恩斯交叉图中，A 代表截距）' },
+
+{ id:31, g:'D', cn:'IS 曲线', en:'IS Curve',
+  enDef:'A locus of points showing all combinations of **interest rates and output levels** at which the **goods market is in equilibrium** (planned investment equals planned saving, or aggregate demand equals output). It is typically **downward sloping** because lower interest rates stimulate investment and thus output.',
+  cnDef:'代表产品市场达到均衡（计划投资等于计划储蓄，或总需求等于总产出）时，利率与产出各种组合的轨迹。由于低利率刺激投资从而增加产出，它通常向右下方倾斜。',
+  tip:'产品市场要平衡，利率低时产出高。',
+  fml:'Y = C(Y − T) + I(r) + G   （由此推导出 r 与 Y 的反向关系）' },
+
+{ id:32, g:'D', cn:'总供给曲线', en:'Aggregate Supply Curve (Yˢ)',
+  enDef:'The aggregate supply curve showing the relationship between the **overall price level** and the **total amount of output** firms are willing to produce. In the **short run**, it is **upward sloping** due to **sticky prices/wages**; in the **long run**, it becomes **vertical** at the **potential (full-employment) output level**.',
+  cnDef:'表示物价总水平与厂商愿意提供的总产出之间关系的曲线。短期由于价格/工资黏性通常向右上方倾斜；长期则垂直于潜在（充分就业）产出水平。',
+  tip:'长期垂直（看潜在产能），短期向上（价格高就多生产）。',
+  fml:'长期：Y = F(K, L) ；  短期：Y = Ȳ + α(P − Pᵉ)' },
+
+{ id:33, g:'D', cn:'需求冲击与供给冲击', en:'Demand and Supply Shocks',
+  enDef:'**Exogenous events** that shift the **aggregate demand (AD)** or **aggregate supply (AS)** curves. **Demand shocks** (e.g., changes in consumer confidence, monetary/fiscal policy) shift the AD curve. **Supply shocks** (e.g., oil price spikes, technological breakthroughs) shift the AS curve.',
+  cnDef:'导致总需求（AD）或总供给（AS）曲线发生移动的外生事件。需求冲击（如消费者信心变化、货币/财政政策）移动AD曲线；供给冲击（如油价飙升、技术突破）移动AS曲线。',
+  tip:'需求冲击动 AD，供给冲击动 AS，外生事件惹的祸。',
+  fml:'无固定公式（作为外生变量改变均衡点，导致经济波动）' }
+];
+
+/* =========================================================
+   用户可编辑层：CONCEPTS = BASE + OVERRIDES
+   ========================================================= */
+let CONCEPTS = BASE_CONCEPTS.map(c => ({ ...c }));
+
+const LS_OVR = 'macro-en-overrides-v1';
+let OVERRIDES = {};
+
+/* =========================================================
+   三天冲刺计划数据
+   ========================================================= */
+const PLAN = {
+  1:{
+    title:'Day 1 · 增长理论日',
+    sub:'Solow 模型 + AK 模型 + 名词 1–13',
+    blocks:[
+      { time:'上午 3h', title:'名词 1–13 + Solow 基础', items:[
+        '过名词 <b>1–13</b>：每张卡片写英文关键词、中文解释、公式、口诀。',
+        '重点盯：规模报酬不变、MPK / MPL、边际报酬递减、稳态、黄金律、动态无效率、收敛、TFP。',
+        '精读大题 <b>2 (1)–(5)</b>：先自己说清「为什么 α &lt; 1 保证 MPK 递减、为什么有稳态」。',
+        '推导人均资本积累方程：<code>kₜ₊₁ = s·A·kₜᵅ + (1−δ)·kₜ</code>。',
+        '手画 Solow 图：横轴 kₜ、纵轴 kₜ₊₁，45° 线与积累曲线相交于 k*。'
+      ]},
+      { time:'下午 3h', title:'Solow 冲击与政策', items:[
+        '大题 <b>2 (4)</b>：战争后 X 国 kₜˣ 在 k* 左边，Z 国 kₜᶻ 在 k* 右边。',
+        '记住：战争只改变初始 kₜ，不改变 s、A、α、δ，所以稳态 k* 不动。',
+        '时间路径：X 国 k↑ y↑ w↑ r↓；Z 国 k↓ y↓ w↓ r↑。',
+        '大题 <b>2 (8)–(10)</b>：条件收敛 → X 增长更快；Z 国政策 = 提高 s、提高 A、降低 δ。'
+      ]},
+      { time:'晚上 2h', title:'AK 模型 + 当日自测', items:[
+        '大题 <b>3 (1)–(5)</b>：MPK = A 为常数，<code>kₜ₊₁ = (1 + sA − δ)kₜ</code>。',
+        '增长率 <code>sA − δ</code>；持续增长条件 <code>sA &gt; δ</code>。',
+        '政策区别：Solow 是水平效应，AK 是增长效应。',
+        '自测：默写两个 kₜ₊₁ 方程，画 Solow 图，口述 AK 为什么没有稳态。'
+      ]}
+    ],
+    checklist:[
+      '能解释 α &lt; 1 与稳态的关系',
+      '能推导 Solow 人均积累方程',
+      '能画 Solow 图并标出 k*',
+      '能说清 X / Z 战后时间路径',
+      '能推导 AK 增长率 sA − δ',
+      '名词 1–13 看英文能说中文'
+    ]
+  },
+  2:{
+    title:'Day 2 · 消费理论日',
+    sub:'大题 4 + 名词 14–26',
+    blocks:[
+      { time:'上午 3h', title:'跨期选择基础', items:[
+        '过名词 <b>14–20</b>：边际效用、贴现因子、跨期预算、欧拉方程、消费函数、消费平滑。',
+        '大题 <b>4 (a)</b>：推导跨期预算约束（现值形式 + 未来值形式）。',
+        '大题 <b>4 (b)</b>：解释「一生消费现值 = 一生收入现值」。',
+        '大题 <b>4 (c)</b>：欧拉方程两边各代表什么，为什么最优时相等。',
+        '默写 <code>U\'(cₜ) = β(1+r)U\'(cₜ₊₁)</code>。'
+      ]},
+      { time:'下午 3h', title:'借贷约束与 MPC', items:[
+        '大题 <b>4 (d)</b>：家庭 B 借贷约束绑定时 Cₜᴮ = Yₜᴮ（角点解 / 经验法则消费者）。',
+        '大题 <b>4 (e)</b>：β = 1、r = 0 时 <code>Cₜᴬ = ½(Yₜᴬ + Yₜ₊₁ᴬ)</code>，即持久收入假说 PIH。',
+        '大题 <b>4 (f)</b>：暂时冲击 → MPCᴀ = 0.5，MPCᴮ = 1。',
+        '大题 <b>4 (g)–(h)</b>：微观 MPC = 0.75，宏观 MPC = 80/100 = 0.8。',
+        '大题 <b>4 (i)</b>：解释聚合偏差——宏观 MPC 按收入变化加权，高 MPC 家庭拿到的冲击更大。'
+      ]},
+      { time:'晚上 2h', title:'永久冲击 + 复盘', items:[
+        '大题 <b>4 (j)</b>：永久冲击 → MPCᴀ = MPCᴮ = 1，微观 = 宏观 = 1。',
+        '大题 <b>4 (k)</b>：暂时 vs 永久冲击下微观 / 宏观 MPC 为什么不同。',
+        '复盘：不看书，重算一遍两张 MPC 表格。'
+      ]}
+    ],
+    checklist:[
+      '能推导跨期预算约束',
+      '能解释欧拉方程两边的含义',
+      '知道借贷约束绑定时 Cₜ = Yₜ',
+      '会算暂时 / 永久冲击下的 MPC',
+      '能解释微观 / 宏观 MPC 差异的来源',
+      '名词 14–26 看英文能复述'
+    ]
+  },
+  3:{
+    title:'Day 3 · 市场均衡与总复习',
+    sub:'大题 5 + 名词 27–33 + 全盘模拟',
+    blocks:[
+      { time:'上午 3h', title:'禀赋经济与 IS 曲线', items:[
+        '过名词 <b>27–33</b>：竞争均衡、市场出清、合意总支出、自发支出、IS、Yˢ、供需冲击。',
+        '大题 <b>5 (1)</b>：消费函数对 Yₜ、Yₜ₊₁ 偏导为正 → 用 PIH 解释。',
+        '大题 <b>5 (2)</b>：市场出清 = <code>Cₜ = Yₜ</code>、<code>Sₜ = 0</code>（债券净供给为零）。',
+        '大题 <b>5 (3)</b>：合意总支出 <code>Yₜᵈ = Cₜᵈ(Yₜ, Yₜ₊₁, rₜ)</code>。',
+        '大题 <b>5 (4)</b>：画凯恩斯交叉（45° + 支出曲线）与 IS-Yˢ 图，两图均衡产出必须一致。'
+      ]},
+      { time:'下午 3h', title:'供给冲击、利率与资源诅咒', items:[
+        '大题 <b>5 (5)</b>：Yₜ 上升 → 消费平滑 → 储蓄↑ → 可贷资金供给右移 → 利率↓。',
+        '大题 <b>5 (6)</b>：高 MPC 国储蓄增加少、利率降幅小；低 MPC 国储蓄增加多、利率降幅大。',
+        '大题 <b>5 (7)</b>：低 MPC → 利率大降 → 资本成本低 → 投资非资源部门 → 避免资源诅咒。',
+        '案例：挪威主权财富基金 vs 部分资源国。'
+      ]},
+      { time:'晚上 3h', title:'全盘总复习 + 模拟考试', items:[
+        '默写全部核心公式：Solow、AK、欧拉、特例消费、市场出清。',
+        '手画全部图形：Solow 图、X / Z 时间路径、凯恩斯交叉、IS-Yˢ。',
+        '模拟考：随机 3 道大题小问 + 10 个名词，限时 2 小时。',
+        '错题与薄弱点最后速记。'
+      ]}
+    ],
+    checklist:[
+      '能画凯恩斯交叉和 IS-Yˢ',
+      '能解释供给冲击为什么让利率下降',
+      '能说清高 / 低 MPC 国的利率差异',
+      '能完整讲资源诅咒的逻辑链',
+      '33 个名词能英文 → 中文 → 公式 → 口诀',
+      '所有大题能合上文档复述'
+    ]
+  }
+};
+
+/* =========================================================
+   工具
+   ========================================================= */
+const esc = s => String(s == null ? '' : s)
+  .replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let toastTimer;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+const byId = id => CONCEPTS.find(c => c.id === id);
+
+/* =========================================================
+   用户编辑覆盖层
+   ========================================================= */
+function loadOverrides(){
+  try{
+    const raw = localStorage.getItem(LS_OVR);
+    if(raw){
+      const o = JSON.parse(raw);
+      if(o && typeof o === 'object' && !Array.isArray(o)) OVERRIDES = o;
+    }
+  }catch(_){ OVERRIDES = {}; }
+  rebuildConcepts();
+}
+function rebuildConcepts(){
+  CONCEPTS = BASE_CONCEPTS.map(c => {
+    const ov = OVERRIDES[c.id];
+    return ov ? Object.assign({}, c, ov) : Object.assign({}, c);
+  });
+}
+function saveOverrides(){
+  try{ localStorage.setItem(LS_OVR, JSON.stringify(OVERRIDES)); }catch(_){}
+}
+function isEdited(id){ return !!OVERRIDES[id]; }
+function hasAnyOverride(){ return Object.keys(OVERRIDES).length > 0; }
+
+function updateConcept(id, patch){
+  const c = CONCEPTS.find(x => x.id === id);
+  if(!c) return;
+  Object.assign(c, patch);
+  OVERRIDES[id] = Object.assign({}, OVERRIDES[id] || {}, patch);
+  saveOverrides();
+  invalidateSessions(id);
+}
+function resetConcept(id){
+  if(!OVERRIDES[id]) return;
+  delete OVERRIDES[id];
+  saveOverrides();
+  const base = BASE_CONCEPTS.find(x => x.id === id);
+  const c = CONCEPTS.find(x => x.id === id);
+  if(base && c){
+    Object.keys(c).forEach(k => { if(!(k in base)) delete c[k]; });
+    Object.assign(c, base);
+  }
+  invalidateSessions(id);
+}
+function resetAllConcepts(){
+  OVERRIDES = {};
+  saveOverrides();
+  rebuildConcepts();
+  invalidateSessions(null);
+  resetSessionOrders();
+}
+// 编辑后清理可能失效的临时状态
+function invalidateSessions(id){
+  if(state.write && (id === null || state.write.qId === id)) state.write = null;
+  state.clRevealed = new Set();
+}
+
+function tokens(def){
+  const out = [];
+  const re = /\*\*(.+?)\*\*/g;
+  let last = 0, m;
+  while((m = re.exec(def)) !== null){
+    if(m.index > last) out.push({t:'x', v:def.slice(last, m.index)});
+    out.push({t:'k', v:m[1]});
+    last = m.index + m[0].length;
+  }
+  if(last < def.length) out.push({t:'x', v:def.slice(last)});
+  return out;
+}
+function renderHi(def){
+  return tokens(def).map(p =>
+    p.t === 'k' ? `<span class="kw">${esc(p.v)}</span>` : esc(p.v)
+  ).join('');
+}
+function plainEn(def){
+  return def.replace(/\*\*(.+?)\*\*/g, '$1');
+}
+function extractKeywords(def){
+  const out = [];
+  const re = /\*\*(.+?)\*\*/g;
+  let m;
+  while((m = re.exec(def)) !== null) out.push(m[1]);
+  return out;
+}
+function tieHash(n){
+  const v = (n * 2654435761 + 7919) % 1000003;
+  return v < 0 ? v + 1000003 : v;
+}
+function selectMaskedKeywords(kwTokens, density){
+  if(!kwTokens.length || density <= 0) return new Set();
+  const count = kwTokens.length;
+  let need = Math.round(count * density / 100);
+  if(need <= 0) need = 1;
+  if(need >= count) return new Set(kwTokens.map(t => t.idx));
+
+  const sorted = kwTokens.slice().sort((a, b) => {
+    const la = a.text.replace(/\s+/g, '').length;
+    const lb = b.text.replace(/\s+/g, '').length;
+    if(lb !== la) return lb - la;
+    return tieHash(a.idx) - tieHash(b.idx);
+  });
+
+  const set = new Set();
+  for(let i = 0; i < need; i++) set.add(sorted[i].idx);
+  return set;
+}
+
+/* =========================================================
+   答案对照引擎
+   ========================================================= */
+function normalize(s){
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function stemMatch(a, b){
+  if(!a || !b) return false;
+  if(a === b) return true;
+  const shorter = Math.min(a.length, b.length);
+  if(shorter < 4) return false;
+  let n = 0;
+  while(n < shorter && a[n] === b[n]) n++;
+  return n >= 4 && n >= shorter * 0.6;
+}
+function userHasWord(userWords, target){
+  const t = target.toLowerCase();
+  if(userWords.has(t)) return true;
+  for(const w of userWords){
+    if(stemMatch(w, t)) return true;
+  }
+  return false;
+}
+function checkAnswer(userText, keywords){
+  const userWords = new Set(normalize(userText).split(' ').filter(Boolean));
+  return keywords.map(kw => {
+    const kwWords = normalize(kw).split(' ').filter(Boolean);
+    const hit = kwWords.length > 0 && kwWords.every(w => userHasWord(userWords, w));
+    return { keyword: kw, hit };
+  });
+}
+
+/* =========================================================
+   语音引擎
+   ========================================================= */
+const Speech = (() => {
+  const ok = typeof window !== 'undefined' && 'speechSynthesis' in window;
+  const LS_VOICE = 'macro-voice-v1';
+
+  let allVoices = [];
+  let ready = false;
+  let readyCbs = [];
+  let prefs = { voiceName: null, rate: 0.85 };
+  let speaking = false;
+  let speakCbs = [];
+
+  function loadPrefs(){
+    try{
+      const raw = localStorage.getItem(LS_VOICE);
+      if(!raw) return;
+      const o = JSON.parse(raw);
+      if(o && typeof o === 'object'){
+        if(typeof o.voiceName === 'string') prefs.voiceName = o.voiceName;
+        if(typeof o.rate === 'number' && o.rate >= 0.4 && o.rate <= 2) prefs.rate = o.rate;
+      }
+    }catch(_){}
+  }
+  function savePrefs(){
+    try{ localStorage.setItem(LS_VOICE, JSON.stringify(prefs)); }catch(_){}
+  }
+  loadPrefs();
+
+  function normTag(t){ return String(t || '').toLowerCase().replace(/_/g, '-'); }
+
+  function loadVoices(){
+    if(!ok) return false;
+    try{
+      const vs = window.speechSynthesis.getVoices();
+      if(vs && vs.length){
+        allVoices = vs;
+        if(!ready){
+          ready = true;
+          const cbs = readyCbs; readyCbs = [];
+          cbs.forEach(cb => { try{ cb(); }catch(_){} });
+        }
+        return true;
+      }
+    }catch(_){}
+    return false;
+  }
+
+  if(ok){
+    loadVoices();
+    let n = 0;
+    const t = setInterval(() => {
+      if(ready || n++ > 50){ clearInterval(t); return; }
+      loadVoices();
+    }, 150);
+    try{
+      window.speechSynthesis.onvoiceschanged = () => {
+        loadVoices();
+        if(ready) clearInterval(t);
+      };
+    }catch(_){}
+  }
+
+  function getEnglishVoices(){
+    if(!allVoices.length) loadVoices();
+    return allVoices.filter(v => /^en\b/i.test(normTag(v.lang)) || /^en-/i.test(normTag(v.lang)));
+  }
+
+  function pickVoice(){
+    if(!allVoices.length) loadVoices();
+    if(prefs.voiceName){
+      const v = allVoices.find(x => x.name === prefs.voiceName);
+      if(v) return v;
+    }
+    return allVoices.find(v => /en[-_]US/i.test(v.lang)) ||
+           allVoices.find(v => /en[-_]GB/i.test(v.lang)) ||
+           allVoices.find(v => /^en/i.test(v.lang)) || null;
+  }
+
+  function setVoiceByName(name){ prefs.voiceName = name || null; savePrefs(); }
+  function getVoiceName(){ return prefs.voiceName; }
+  function getVoice(){
+    const v = pickVoice();
+    return v ? { name: v.name, lang: v.lang } : null;
+  }
+  function setRate(r){ prefs.rate = r; savePrefs(); }
+  function getRate(){ return prefs.rate; }
+
+  function isReady(){ return ready; }
+  function onReady(cb){
+    if(ready){ try{ cb(); }catch(_){} }
+    else readyCbs.push(cb);
+  }
+
+  function notifySpeak(state){
+    speaking = state;
+    const cbs = speakCbs.slice();
+    cbs.forEach(cb => { try{ cb(state); }catch(_){} });
+  }
+  function onSpeakChange(cb){
+    speakCbs.push(cb);
+    try{ cb(speaking); }catch(_){}
+  }
+  function isSpeaking(){ return speaking; }
+
+  function cancel(){
+    if(!ok) return;
+    try{
+      if(window.speechSynthesis.speaking || window.speechSynthesis.pending){
+        window.speechSynthesis.cancel();
+      }
+    }catch(_){}
+    notifySpeak(false);
+  }
+
+  function say(text){
+    if(!ok){ toast('浏览器不支持语音合成'); return; }
+    if(!text) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice();
+      if(v){ u.voice = v; u.lang = v.lang; }
+      else { u.lang = 'en-US'; }
+      u.rate = prefs.rate; u.pitch = 1; u.volume = 1;
+
+      u.onstart = () => notifySpeak(true);
+      u.onend = () => notifySpeak(false);
+      u.onerror = () => notifySpeak(false);
+
+      try{ window.speechSynthesis.resume(); }catch(_){}
+      window.speechSynthesis.speak(u);
+      setTimeout(() => { if(!speaking) notifySpeak(true); }, 80);
+    }catch(_){ toast('朗读失败'); notifySpeak(false); }
+  }
+
+  return {
+    ok, say, cancel,
+    getEnglishVoices, setVoiceByName, getVoiceName, getVoice,
+    setRate, getRate, isReady, onReady,
+    isSpeaking, onSpeakChange
+  };
+})();
+
+/* =========================================================
+   语音设置面板
+   ========================================================= */
+const voicePanel = document.getElementById('voicePanel');
+const voiceBtn = document.getElementById('voiceBtn');
+const voiceSelect = document.getElementById('voiceSelect');
+const rateSelect = document.getElementById('rateSelect');
+const vpTest = document.getElementById('vpTest');
+
+function populateVoiceSelect(){
+  if(!Speech.ok){
+    voiceSelect.innerHTML = '<option>浏览器不支持</option>';
+    voiceSelect.disabled = true;
+    return;
+  }
+  const voices = Speech.getEnglishVoices();
+  if(!voices.length){
+    voiceSelect.innerHTML = '<option>未检测到英语语音</option>';
+    voiceSelect.disabled = true;
+    return;
+  }
+  voiceSelect.disabled = false;
+  const sorted = voices.slice().sort((a, b) => {
+    const la = String(a.lang).toLowerCase();
+    const lb = String(b.lang).toLowerCase();
+    if(la !== lb) return la < lb ? -1 : 1;
+    return String(a.name).localeCompare(String(b.name));
+  });
+  const current = Speech.getVoiceName();
+  voiceSelect.innerHTML =
+    `<option value="">自动选择（推荐）</option>` +
+    sorted.map(v =>
+      `<option value="${esc(v.name)}"${v.name === current ? ' selected' : ''}>${esc(v.name)} · ${esc(v.lang)}</option>`
+    ).join('');
+  if(current && !sorted.some(v => v.name === current)){
+    Speech.setVoiceByName(null);
+    voiceSelect.value = '';
+  }
+  voiceBtn.classList.toggle('has-voice', !!Speech.getVoiceName());
+}
+function updateRateSelect(){
+  rateSelect.value = String(Speech.getRate());
+}
+function refreshVoiceUI(){
+  populateVoiceSelect();
+  updateRateSelect();
+  const v = Speech.getVoice();
+  if(vpTest) vpTest.title = v ? v.name + ' (' + v.lang + ')' : '默认英语语音';
+}
+voiceBtn.onclick = e => {
+  e.stopPropagation();
+  voicePanel.classList.toggle('open');
+  if(voicePanel.classList.contains('open')) refreshVoiceUI();
+};
+voiceSelect.onchange = () => {
+  Speech.cancel();
+  Speech.setVoiceByName(voiceSelect.value || null);
+  voiceBtn.classList.toggle('has-voice', !!Speech.getVoiceName());
+  toast(voiceSelect.value ? '已切换语音引擎' : '已切换为自动选择');
+};
+rateSelect.onchange = () => {
+  Speech.cancel();
+  Speech.setRate(+rateSelect.value);
+  toast('语速：' + rateSelect.value + 'x');
+};
+vpTest.onclick = () => {
+  if(Speech.isSpeaking()){ Speech.cancel(); return; }
+  Speech.say('This is a test of the current text to speech voice. Real GDP is the same measure but valued at constant base-year prices.');
+};
+Speech.onSpeakChange(s => {
+  if(vpTest){
+    vpTest.classList.toggle('playing', s);
+    vpTest.textContent = s ? '⏹ 停止朗读' : '🔊 试听当前语音';
+  }
+  document.querySelectorAll('[data-speak-btn]').forEach(b => {
+    b.classList.toggle('playing', s);
+  });
+});
+document.addEventListener('click', e => {
+  if(!voicePanel.classList.contains('open')) return;
+  if(voicePanel.contains(e.target) || voiceBtn.contains(e.target)) return;
+  voicePanel.classList.remove('open');
+});
+Speech.onReady(refreshVoiceUI);
+
+/* =========================================================
+   状态
+   ========================================================= */
+const LS = 'macro-en-v6';
+const state = {
+  mode:'browse',
+  theme:'auto',
+  showCN:true,
+  query:'',
+  filter:'all',
+  group:'all',
+  mastered:new Set(),
+  starred:new Set(),
+  rcIdx:0, rcOrder:[], rcFlipped:false,
+  clIdx:0, clOrder:[], clRevealed:new Set(),
+  clozeDensity: 60,
+  wcIdx:0, wcOrder:[],
+  write:null,
+  writeStats:{ hits:0, keywords:0, count:0 },
+  planDay:1,
+  planDone:new Set()
+};
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS);
+    if(!raw) return;
+    const o = JSON.parse(raw);
+    if(Array.isArray(o.mastered)) state.mastered = new Set(o.mastered);
+    if(Array.isArray(o.starred)) state.starred = new Set(o.starred);
+    if(['auto','light','dark'].includes(o.theme)) state.theme = o.theme;
+    if(typeof o.showCN === 'boolean') state.showCN = o.showCN;
+    if(['browse','recall','cloze','write','plan','pdf'].includes(o.mode)) state.mode = o.mode;
+    if(typeof o.clozeDensity === 'number' && o.clozeDensity >= 0 && o.clozeDensity <= 100){
+      state.clozeDensity = o.clozeDensity;
+    }
+    if(o.writeStats && typeof o.writeStats === 'object'){
+      state.writeStats = {
+        hits: +o.writeStats.hits || 0,
+        keywords: +o.writeStats.keywords || 0,
+        count: +o.writeStats.count || 0
+      };
+    }
+    if(typeof o.planDay === 'number' && o.planDay >= 1 && o.planDay <= 3) state.planDay = o.planDay;
+    if(Array.isArray(o.planDone)) state.planDone = new Set(o.planDone);
+  }catch(_){}
+}
+function saveState(){
+  try{
+    localStorage.setItem(LS, JSON.stringify({
+      mastered:[...state.mastered],
+      starred:[...state.starred],
+      theme:state.theme, showCN:state.showCN,
+      mode:state.mode,
+      clozeDensity: state.clozeDensity,
+      writeStats:state.writeStats,
+      planDay: state.planDay,
+      planDone: [...state.planDone]
+    }));
+  }catch(_){}
+}
+
+/* =========================================================
+   主题
+   ========================================================= */
+const mqDark = window.matchMedia('(prefers-color-scheme: dark)');
+function applyTheme(){
+  const eff = state.theme === 'auto' ? (mqDark.matches ? 'dark' : 'light') : state.theme;
+  document.documentElement.dataset.theme = eff;
+  const b = document.getElementById('themeBtn');
+  if(b) b.textContent = state.theme === 'auto' ? '🌗' : (state.theme === 'light' ? '☀️' : '🌙');
+}
+function cycleTheme(){
+  const o = ['auto','light','dark'];
+  state.theme = o[(o.indexOf(state.theme)+1)%3];
+  saveState(); applyTheme();
+  toast(state.theme === 'auto' ? '跟随系统' : state.theme === 'light' ? '浅色模式' : '深色模式');
+}
+try{ mqDark.addEventListener('change', () => { if(state.theme==='auto') applyTheme(); }); }catch(_){}
+
+/* =========================================================
+   筛选
+   ========================================================= */
+function pool(){
+  let l = CONCEPTS.slice();
+  if(state.group !== 'all') l = l.filter(c => c.g === state.group);
+  if(state.filter === 'todo') l = l.filter(c => !state.mastered.has(c.id));
+  else if(state.filter === 'done') l = l.filter(c => state.mastered.has(c.id));
+  else if(state.filter === 'star') l = l.filter(c => state.starred.has(c.id));
+  // 搜索框仅在浏览模式渲染，故查询也只在浏览模式生效，避免跨模式静默过滤
+  if(state.mode === 'browse'){
+    const q = state.query.trim().toLowerCase();
+    if(q) l = l.filter(c =>
+      (c.cn+' '+c.en+' '+plainEn(c.enDef)+' '+c.cnDef+' '+c.tip+' '+c.fml).toLowerCase().includes(q)
+    );
+  }
+  return l;
+}
+
+/* =========================================================
+   进度
+   ========================================================= */
+function updateProg(){
+  const n = state.mastered.size, t = CONCEPTS.length;
+  const f = document.getElementById('progFill'), x = document.getElementById('progText');
+  if(f) f.style.width = (n/t*100)+'%';
+  if(x) x.textContent = n+'/'+t;
+}
+
+/* =========================================================
+   工具栏
+   ========================================================= */
+function renderTool(){
+  document.querySelectorAll('#tabs button').forEach(b =>
+    b.classList.toggle('active', b.dataset.mode === state.mode));
+
+  const row = document.getElementById('toolRow');
+  if(state.mode === 'plan' || state.mode === 'pdf'){
+    row.innerHTML = '';
+    row.style.display = 'none';
+    return;
+  }
+  row.style.display = '';
+
+  const needSearch = (state.mode === 'browse');
+  const needFilter = (state.mode === 'browse' || state.mode === 'recall' || state.mode === 'cloze' || state.mode === 'write');
+  const needGroup  = true;   // 所有模式都显示分组条，确保 pool() 的过滤对用户可见
+
+  const cnt = {};
+  CONCEPTS.forEach(c => cnt[c.g] = (cnt[c.g]||0)+1);
+  const TOTAL = CONCEPTS.length;
+
+  let h = '';
+  if(needSearch){
+    h += `<div class="search"><input id="q" type="search" placeholder="Search concepts, formulas…" value="${esc(state.query)}"></div>`;
+  }
+  if(needGroup){
+    h += `<div class="chips" id="gchips">
+      <button class="chip ${state.group==='all'?'active':''}" data-g="all">全部<span class="n">${TOTAL}</span></button>
+      ${Object.keys(GROUPS).map(g =>
+        `<button class="chip ${state.group===g?'active':''}" data-g="${g}">${esc(GROUPS[g])}<span class="n">${cnt[g]||0}</span></button>`
+      ).join('')}
+    </div>`;
+  }
+  if(needFilter){
+    const nm = state.mastered.size;
+    h += `<div class="chips" id="fchips">
+      <button class="chip ${state.filter==='all'?'active':''}" data-f="all">全部</button>
+      <button class="chip ${state.filter==='todo'?'active':''}" data-f="todo">未掌握<span class="n">${TOTAL-nm}</span></button>
+      <button class="chip ${state.filter==='done'?'active':''}" data-f="done">已掌握<span class="n">${nm}</span></button>
+      <button class="chip ${state.filter==='star'?'active':''}" data-f="star">★<span class="n">${state.starred.size}</span></button>
+    </div>`;
+  }
+  if(state.mode === 'recall' || state.mode === 'cloze' || state.mode === 'write'){
+    h += `<button class="btn ghost" id="shuffleBtn" style="font-size:12px;padding:7px 13px">🔀 打乱</button>`;
+  }
+  if(state.mode === 'write'){
+    h += `<button class="btn ghost" id="resetW" style="font-size:12px;padding:7px 13px">↺ 清空统计</button>`;
+  }
+  if(state.mode === 'browse' && hasAnyOverride()){
+    h += `<button class="btn ghost" id="resetAllEdit" style="font-size:12px;padding:7px 13px">↺ 重置所有编辑</button>`;
+  }
+  row.innerHTML = h;
+
+  const qi = document.getElementById('q');
+  if(qi) qi.oninput = () => { state.query = qi.value; renderBrowse(); };
+
+  const gc = document.getElementById('gchips');
+  if(gc) gc.onclick = e => {
+    const b = e.target.closest('[data-g]'); if(!b) return;
+    state.group = b.dataset.g;
+    resetSessionOrders();
+    render();
+  };
+  const fc = document.getElementById('fchips');
+  if(fc) fc.onclick = e => {
+    const b = e.target.closest('[data-f]'); if(!b) return;
+    state.filter = b.dataset.f;
+    resetSessionOrders();
+    render();
+  };
+  const sb = document.getElementById('shuffleBtn');
+  if(sb) sb.onclick = () => {
+    const ids = pool().map(c => c.id);
+    for(let i = ids.length-1; i > 0; i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [ids[i],ids[j]] = [ids[j],ids[i]];
+    }
+    if(state.mode === 'recall'){ state.rcOrder = ids; state.rcIdx = 0; state.rcFlipped = false; }
+    else if(state.mode === 'cloze'){ state.clOrder = ids; state.clIdx = 0; state.clRevealed = new Set(); }
+    else { state.wcOrder = ids; state.wcIdx = 0; state.write = null; }
+    render();
+    toast('已打乱顺序');
+  };
+  const rw = document.getElementById('resetW');
+  if(rw) rw.onclick = () => {
+    state.writeStats = { hits:0, keywords:0, count:0 };
+    saveState(); render();
+    toast('统计已清空');
+  };
+  const rae = document.getElementById('resetAllEdit');
+  if(rae) rae.onclick = () => {
+    if(!confirm('确定要恢复所有概念的默认内容吗？此操作不可撤销。')) return;
+    resetAllConcepts();
+    render();
+    toast('已恢复全部默认内容');
+  };
+}
+function resetSessionOrders(){
+  state.rcIdx = 0; state.clIdx = 0; state.wcIdx = 0;
+  state.rcFlipped = false;
+  state.rcOrder = []; state.clOrder = []; state.wcOrder = [];
+  state.clRevealed = new Set();
+  state.write = null;
+}
+
+/* =========================================================
+   主渲染
+   ========================================================= */
+const view = document.getElementById('view');
+
+function render(){
+  updateProg();
+  renderTool();
+  if(state.mode === 'browse') renderBrowse();
+  else if(state.mode === 'recall') renderRecall();
+  else if(state.mode === 'cloze') renderCloze();
+  else if(state.mode === 'write') renderWrite();
+  else if(state.mode === 'plan') renderPlan();
+  else if(state.mode === 'pdf') renderPdf();
+}
+
+/* =========================================================
+   模式一：浏览
+   ========================================================= */
+function renderBrowse(){
+  const list = pool();
+  if(!list.length){
+    view.innerHTML = `<div class="empty"><div class="big">🔍</div>
+      <h3>没有匹配的概念</h3><p>试试换个关键词，或清空筛选条件。</p></div>`;
+    return;
+  }
+  const order = ['A','B','C','D'];
+  let h = '';
+  order.forEach(g => {
+    const items = list.filter(c => c.g === g);
+    if(!items.length) return;
+    h += `<div class="ghead"><span class="bar"></span>${esc(GROUPS[g]||g)}<span class="cnt">${items.length}</span></div>`;
+    h += `<div class="grid">${items.map(browseCard).join('')}</div>`;
+  });
+  view.innerHTML = h;
+  view.querySelectorAll('.bc').forEach(el => {
+    el.onclick = e => {
+      const st = e.target.closest('[data-star]');
+      if(st){ e.stopPropagation(); toggleStar(+st.dataset.star); return; }
+      const tk = e.target.closest('[data-tick]');
+      if(tk){ e.stopPropagation(); toggleMastered(+tk.dataset.tick); return; }
+      openModal(+el.dataset.id);
+    };
+  });
+}
+
+function browseCard(c){
+  const done = state.mastered.has(c.id);
+  const star = state.starred.has(c.id);
+  return `
+    <div class="bc ${done?'done':''}" data-id="${c.id}">
+      <div class="bc-top">
+        <span class="bc-num">${String(c.id).padStart(2,'0')}</span>
+        <div class="bc-names">
+          <div class="bc-en">${esc(c.en)}</div>
+          ${state.showCN ? `<div class="bc-cn">${esc(c.cn)}</div>` : ''}
+        </div>
+      </div>
+      <div class="bc-def">${renderHi(c.enDef)}</div>
+      <div class="bc-fml">${esc(c.fml)}</div>
+      <div class="bc-foot">
+        <span class="bc-hint">${done ? '✓ MASTERED' : 'TAP TO OPEN'}</span>
+        ${isEdited(c.id) ? '<span class="bc-edited" title="已自定义">✎</span>' : ''}
+        <span class="spacer"></span>
+        <span class="star ${star?'on':''}" data-star="${c.id}" title="收藏">★</span>
+        <button class="tick" data-tick="${c.id}" title="${done?'取消掌握':'标记已掌握'}">✓</button>
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+   模式二：背诵
+   ========================================================= */
+function renderRecall(){
+  const list = pool();
+  if(!list.length){
+    view.innerHTML = `<div class="empty"><div class="big">🧠</div>
+      <h3>没有可背诵的卡片</h3><p>换个筛选条件试试。</p></div>`;
+    return;
+  }
+  const ids = list.map(c => c.id);
+  if(state.rcOrder.length !== ids.length || !state.rcOrder.every(i => ids.includes(i))){
+    const cur = state.rcOrder[state.rcIdx];
+    state.rcOrder = ids;
+    const i = ids.indexOf(cur);
+    state.rcIdx = i >= 0 ? i : 0;
+  }
+  state.rcIdx = Math.max(0, Math.min(state.rcIdx, state.rcOrder.length-1));
+
+  const c = byId(state.rcOrder[state.rcIdx]);
+  if(!c){ state.rcIdx = 0; renderRecall(); return; }
+
+  view.innerHTML = `
+    <div class="stage">
+      <div class="fc ${state.rcFlipped?'flipped':''}" id="fc">
+        <div class="fc-in">
+          <div class="fc-face fc-front">
+            <div class="fc-badge">${esc(GROUPS[c.g]||c.g)} · ${String(c.id).padStart(2,'0')}</div>
+            <div class="fc-en">${esc(c.en)}</div>
+            ${state.showCN ? `<div class="fc-cn">${esc(c.cn)}</div>` : ''}
+            <div class="fc-prompt">Say the definition in English</div>
+          </div>
+          <div class="fc-face fc-back">
+            <div class="fc-sec">
+              <div class="fc-label">English Definition</div>
+              <div class="fc-def">${renderHi(c.enDef)}</div>
+            </div>
+            ${state.showCN ? `
+            <div class="fc-sec">
+              <div class="fc-label">中文对照</div>
+              <div class="fc-cn-def">${esc(c.cnDef)}</div>
+            </div>` : ''}
+            <div class="fc-sec">
+              <div class="fc-label">Key Formula</div>
+              <div class="fc-fml">${esc(c.fml)}</div>
+            </div>
+            ${state.showCN ? `
+            <div class="fc-sec">
+              <div class="fc-label">记忆口诀</div>
+              <div class="fc-tipbox">💡 ${esc(c.tip)}</div>
+            </div>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <div class="fc-ctrl">
+        <button class="btn" id="prev" ${state.rcIdx===0?'disabled':''}>← Prev</button>
+        <span class="counter">${state.rcIdx+1} / ${state.rcOrder.length}</span>
+        <button class="btn" id="next" ${state.rcIdx>=state.rcOrder.length-1?'disabled':''}>Next →</button>
+      </div>
+
+      <div class="fc-ctrl">
+        <button class="btn ok" id="gotIt">✓ 记住了</button>
+        <button class="btn warn" id="again">再练练</button>
+        <button class="btn ghost speak" data-speak-btn id="speak">🔊 朗读</button>
+        <button class="btn ghost" id="flip">${state.rcFlipped?'看正面':'看背面'}</button>
+      </div>
+
+      <div class="dots">
+        ${state.rcOrder.map((id,i) =>
+          `<i class="${state.mastered.has(id)?'done':''} ${i===state.rcIdx?'cur':''}" data-i="${i}"></i>`
+        ).join('')}
+      </div>
+    </div>
+  `;
+
+  const fc = document.getElementById('fc');
+  fc.onclick = () => { state.rcFlipped = !state.rcFlipped; fc.classList.toggle('flipped', state.rcFlipped); };
+
+  document.getElementById('prev').onclick = e => { e.stopPropagation(); move(-1); };
+  document.getElementById('next').onclick = e => { e.stopPropagation(); move(1); };
+  document.getElementById('flip').onclick = e => {
+    e.stopPropagation();
+    state.rcFlipped = !state.rcFlipped;
+    fc.classList.toggle('flipped', state.rcFlipped);
+    e.target.textContent = state.rcFlipped ? '看正面' : '看背面';
+  };
+  document.getElementById('gotIt').onclick = e => {
+    e.stopPropagation();
+    if(!state.mastered.has(c.id)){ state.mastered.add(c.id); saveState(); }
+    state.rcFlipped = false;
+    if(state.rcIdx < state.rcOrder.length-1) state.rcIdx++;
+    render();
+    toast('✓ 已掌握');
+  };
+  document.getElementById('again').onclick = e => {
+    e.stopPropagation();
+    if(state.mastered.has(c.id)){ state.mastered.delete(c.id); saveState(); }
+    state.rcFlipped = false;
+    if(state.rcIdx < state.rcOrder.length-1) state.rcIdx++;
+    render();
+  };
+  document.getElementById('speak').onclick = e => {
+    e.stopPropagation();
+    if(Speech.isSpeaking()){ Speech.cancel(); return; }
+    Speech.say(plainEn(c.enDef));
+  };
+  view.querySelectorAll('.dots i').forEach(d => {
+    d.onclick = e => {
+      e.stopPropagation();
+      state.rcIdx = +d.dataset.i;
+      state.rcFlipped = false;
+      render();
+    };
+  });
+}
+function move(d){
+  const n = state.rcIdx + d;
+  if(n < 0 || n >= state.rcOrder.length) return;
+  state.rcIdx = n;
+  state.rcFlipped = false;
+  render();
+}
+
+/* =========================================================
+   模式三：挖空
+   ========================================================= */
+function renderCloze(){
+  const list = pool();
+  if(!list.length){
+    view.innerHTML = `<div class="empty"><div class="big">✍️</div>
+      <h3>没有可挖空的概念</h3><p>换个筛选条件试试。</p></div>`;
+    return;
+  }
+  const ids = list.map(c => c.id);
+  if(state.clOrder.length !== ids.length || !state.clOrder.every(i => ids.includes(i))){
+    const cur = state.clOrder[state.clIdx];
+    state.clOrder = ids;
+    const i = ids.indexOf(cur);
+    state.clIdx = i >= 0 ? i : 0;
+  }
+  state.clIdx = Math.max(0, Math.min(state.clIdx, state.clOrder.length-1));
+
+  const c = byId(state.clOrder[state.clIdx]);
+  if(!c){ state.clIdx = 0; renderCloze(); return; }
+
+  const parts = tokens(c.enDef);
+  const kwTokens = [];
+  parts.forEach((p, i) => { if(p.t === 'k') kwTokens.push({ idx:i, text:p.v }); });
+  const prefix = c.id + '-';
+
+  function buildBody(){
+    const maskSet = selectMaskedKeywords(kwTokens, state.clozeDensity);
+    let revealedCount = 0;
+    const html = parts.map((p, i) => {
+      if(p.t === 'x') return esc(p.v);
+      const isMasked = maskSet.has(i);
+      if(!isMasked){
+        return `<span class="kw">${esc(p.v)}</span>`;
+      }
+      const on = state.clRevealed.has(prefix + i);
+      if(on) revealedCount++;
+      const w = Math.max(3, Math.min(p.v.length, 22));
+      return `<span class="blank ${on?'on':''}" data-bi="${i}" style="min-width:${w}ch">${on?esc(p.v):'&nbsp;'}</span>`;
+    }).join('');
+    return { html, masked: maskSet.size, revealed: revealedCount, total: kwTokens.length };
+  }
+
+  const init = buildBody();
+
+  view.innerHTML = `
+    <div class="cloze-wrap">
+      <div class="cloze-card">
+        <div class="cloze-head">
+          <span class="cloze-num">${String(c.id).padStart(2,'0')}</span>
+          <span class="cloze-en">${esc(c.en)}</span>
+        </div>
+        ${state.showCN ? `<div class="cloze-cn">${esc(c.cn)}</div>` : '<div style="height:14px"></div>'}
+
+        <div class="cloze-density">
+          <span class="density-label">遮蔽度</span>
+          <input type="range" class="density-range" id="clozeDensity"
+                 min="0" max="100" step="10" value="${state.clozeDensity}">
+          <span class="density-value" id="clozeDensityVal">${state.clozeDensity}%</span>
+          <span class="density-info" id="clozeDensityInfo">${init.masked}/${init.total}</span>
+        </div>
+
+        <div class="cloze-body" id="clozeBody">${init.html}</div>
+
+        <div class="cloze-bar">
+          <button class="btn" id="hintOne">💡 提示一个</button>
+          <button class="btn" id="revealAll">全部揭示</button>
+          <button class="btn ghost" id="hideAll">重新遮蔽</button>
+          <button class="btn ghost speak" data-speak-btn id="speakCloze">🔊 朗读</button>
+          <span class="cloze-stat" id="clozeStat">${init.revealed} / ${init.masked}</span>
+        </div>
+      </div>
+
+      <div class="fc-ctrl" style="margin-top:16px">
+        <button class="btn" id="cPrev" ${state.clIdx===0?'disabled':''}>← Prev</button>
+        <span class="counter">${state.clIdx+1} / ${state.clOrder.length}</span>
+        <button class="btn primary" id="cNext" ${state.clIdx>=state.clOrder.length-1?'disabled':''}>Next →</button>
+      </div>
+    </div>
+  `;
+
+  const body = document.getElementById('clozeBody');
+  const statEl = document.getElementById('clozeStat');
+  const infoEl = document.getElementById('clozeDensityInfo');
+  const slider = document.getElementById('clozeDensity');
+  const sliderVal = document.getElementById('clozeDensityVal');
+
+  function refreshBody(){
+    const r = buildBody();
+    body.innerHTML = r.html;
+    statEl.textContent = r.revealed + ' / ' + r.masked;
+    infoEl.textContent = r.masked + '/' + r.total;
+  }
+  function refreshStat(){
+    const total = body.querySelectorAll('.blank').length;
+    const revealed = body.querySelectorAll('.blank.on').length;
+    statEl.textContent = revealed + ' / ' + total;
+  }
+  function revealBlank(b){
+    const idx = +b.dataset.bi;
+    state.clRevealed.add(prefix + idx);
+    b.classList.add('on');
+    b.textContent = parts[idx].v;
+  }
+
+  body.onclick = e => {
+    const b = e.target.closest('.blank'); if(!b) return;
+    if(b.classList.contains('on')) return;
+    revealBlank(b);
+    refreshStat();
+  };
+
+  slider.oninput = () => {
+    state.clozeDensity = +slider.value;
+    sliderVal.textContent = state.clozeDensity + '%';
+    [...state.clRevealed].forEach(k => { if(k.startsWith(prefix)) state.clRevealed.delete(k); });
+    saveState();
+    refreshBody();
+  };
+
+  document.getElementById('hintOne').onclick = () => {
+    const hidden = body.querySelectorAll('.blank:not(.on)');
+    if(!hidden.length){ toast('已全部揭示'); return; }
+    revealBlank(hidden[0]);
+    refreshStat();
+  };
+  document.getElementById('revealAll').onclick = () => {
+    body.querySelectorAll('.blank').forEach(b => revealBlank(b));
+    refreshStat();
+  };
+  document.getElementById('hideAll').onclick = () => {
+    [...state.clRevealed].forEach(k => { if(k.startsWith(prefix)) state.clRevealed.delete(k); });
+    refreshBody();
+  };
+  document.getElementById('speakCloze').onclick = () => {
+    if(Speech.isSpeaking()){ Speech.cancel(); return; }
+    Speech.say(plainEn(c.enDef));
+  };
+  document.getElementById('cPrev').onclick = () => {
+    if(state.clIdx > 0){ state.clIdx--; state.clRevealed = new Set(); renderCloze(); }
+  };
+  document.getElementById('cNext').onclick = () => {
+    if(state.clIdx < state.clOrder.length-1){ state.clIdx++; state.clRevealed = new Set(); renderCloze(); }
+  };
+}
+
+/* =========================================================
+   模式四：默写
+   ========================================================= */
+function renderWrite(){
+  const list = pool();
+  if(!list.length){
+    view.innerHTML = `<div class="empty"><div class="big">📝</div>
+      <h3>没有可默写的概念</h3><p>换个筛选条件试试。</p></div>`;
+    return;
+  }
+  const ids = list.map(c => c.id);
+  if(state.wcOrder.length !== ids.length || !state.wcOrder.every(i => ids.includes(i))){
+    const cur = state.wcOrder[state.wcIdx];
+    state.wcOrder = ids;
+    const i = ids.indexOf(cur);
+    state.wcIdx = i >= 0 ? i : 0;
+  }
+  state.wcIdx = Math.max(0, Math.min(state.wcIdx, state.wcOrder.length-1));
+
+  const c = byId(state.wcOrder[state.wcIdx]);
+  if(!c){ state.wcIdx = 0; renderWrite(); return; }
+
+  const w = state.write && state.write.qId === c.id ? state.write : null;
+  const submitted = !!(w && w.submitted);
+
+  const st = state.writeStats;
+  const rate = st.keywords > 0 ? Math.round(st.hits / st.keywords * 100) : 0;
+
+  if(!submitted){
+    view.innerHTML = `
+      <div class="write-wrap">
+        <div class="write-top">
+          <span class="chip active">默写 · ${state.wcIdx+1} / ${state.wcOrder.length}</span>
+          <span class="write-score">累计命中 ${st.hits}/${st.keywords}${st.count ? ' · ' + rate + '%' : ''}</span>
+        </div>
+
+        <div class="write-qcard">
+          <div class="write-term">${esc(c.en)}</div>
+          ${state.showCN ? `<div class="write-cn">${esc(c.cn)}</div>` : ''}
+          <div class="write-hintline">Write the full English definition from memory.</div>
+        </div>
+
+        <textarea class="write-area" id="writeArea"
+          placeholder="Type your definition here...  (Ctrl / ⌘ + Enter 提交)"
+          spellcheck="false" autocapitalize="off" autocomplete="off">${esc(w ? w.answer : '')}</textarea>
+
+        <div class="write-actions">
+          <button class="btn primary" id="submitBtn">提交并对照答案</button>
+          <button class="btn ghost" id="skipBtn">跳过 →</button>
+          <span class="write-tip">提交后会显示标准答案，并标出你命中/遗漏的关键词</span>
+        </div>
+      </div>
+    `;
+
+    const ta = document.getElementById('writeArea');
+    setTimeout(() => ta && ta.focus(), 40);
+
+    ta.addEventListener('input', () => {
+      if(!state.write || state.write.qId !== c.id){
+        state.write = { qId: c.id, answer: ta.value, submitted:false, results:null };
+      } else {
+        state.write.answer = ta.value;
+      }
+    });
+    ta.addEventListener('keydown', e => {
+      if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){
+        e.preventDefault();
+        doSubmit(c, ta.value);
+      }
+    });
+
+    document.getElementById('submitBtn').onclick = () => doSubmit(c, ta.value);
+    document.getElementById('skipBtn').onclick = () => {
+      if(state.wcIdx < state.wcOrder.length-1){ state.wcIdx++; state.write = null; renderWrite(); }
+      else toast('已是最后一题');
+    };
+    return;
+  }
+
+  const results = w.results || [];
+  const hits = results.filter(r => r.hit).length;
+  const total = results.length;
+  const pct = total > 0 ? Math.round(hits / total * 100) : 0;
+  let badgeCls = 'score-badge';
+  let msg = '';
+  if(pct >= 80){ badgeCls += ' high'; msg = 'Excellent — 关键点覆盖很完整！'; }
+  else if(pct >= 50){ badgeCls += ' mid'; msg = 'Good — 主要点写到了，个别术语可以再补。'; }
+  else { badgeCls += ' low'; msg = '再练练 — 对照标准答案，把遗漏的点记下来。'; }
+
+  view.innerHTML = `
+    <div class="write-wrap">
+      <div class="write-top">
+        <span class="chip active">默写 · ${state.wcIdx+1} / ${state.wcOrder.length}</span>
+        <span class="write-score">累计命中 ${st.hits}/${st.keywords}${st.count ? ' · ' + rate + '%' : ''}</span>
+      </div>
+
+      <div class="write-qcard">
+        <div class="write-term">${esc(c.en)}</div>
+        ${state.showCN ? `<div class="write-cn">${esc(c.cn)}</div>` : ''}
+      </div>
+
+      <div class="result-card">
+        <div class="result-score">
+          <span class="${badgeCls}">命中 ${hits} / ${total} 关键词 · ${pct}%</span>
+          <span class="score-msg">${esc(msg)}</span>
+        </div>
+
+        <div class="result-label">Standard Definition</div>
+        <div class="standard-def">${renderHi(c.enDef)}</div>
+
+        <div class="result-label">Keyword Coverage</div>
+        <div class="kw-list">
+          ${results.map(r => `
+            <div class="kw-item ${r.hit?'hit':'miss'}">
+              <span class="kw-mark">${r.hit ? '✓' : '✕'}</span>
+              <span class="kw-text">${esc(r.keyword)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="write-actions">
+        <button class="btn ok" id="gotIt">✓ 掌握了，下一题</button>
+        <button class="btn warn" id="again">再来一遍</button>
+        <button class="btn ghost speak" data-speak-btn id="speakStd">🔊 朗读标准答案</button>
+        <span class="write-tip">${state.wcIdx < state.wcOrder.length-1 ? '' : '这是最后一题'}</span>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('gotIt').onclick = () => {
+    if(!state.mastered.has(c.id)){ state.mastered.add(c.id); saveState(); }
+    const isLast = state.wcIdx >= state.wcOrder.length - 1;
+    state.write = null;
+    if(!isLast) state.wcIdx++;
+    render();
+    toast(isLast ? '✓ 已掌握 · 已是最后一题' : '✓ 已掌握');
+  };
+  document.getElementById('again').onclick = () => {
+    state.write = null;
+    renderWrite();
+    setTimeout(() => {
+      const ta = document.getElementById('writeArea');
+      if(ta) ta.focus();
+    }, 40);
+  };
+  document.getElementById('speakStd').onclick = () => {
+    if(Speech.isSpeaking()){ Speech.cancel(); return; }
+    Speech.say(plainEn(c.enDef));
+  };
+}
+
+function doSubmit(c, answerText){
+  const text = String(answerText || '').trim();
+  if(!text){
+    toast('请先写下你的定义，或点击"跳过"');
+    return;
+  }
+  const keywords = extractKeywords(c.enDef);
+  const results = checkAnswer(text, keywords);
+  const hits = results.filter(r => r.hit).length;
+  const total = results.length;
+
+  state.write = { qId: c.id, answer: text, submitted: true, results };
+  state.writeStats.hits += hits;
+  state.writeStats.keywords += total;
+  state.writeStats.count += 1;
+  saveState();
+
+  renderWrite();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* =========================================================
+   模式五：三天计划
+   ========================================================= */
+function renderPlan(){
+  const day = state.planDay;
+  const d = PLAN[day];
+  if(!d){ state.planDay = 1; renderPlan(); return; }
+
+  const totalItems = d.blocks.reduce((s,b) => s + b.items.length, 0);
+  const doneItems = d.blocks.reduce((s,b,bi) =>
+    s + b.items.filter((_,ii) => state.planDone.has(`${day}-b${bi}-${ii}`)).length, 0);
+  const pct = totalItems ? Math.round(doneItems / totalItems * 100) : 0;
+
+  const blocksHtml = d.blocks.map((b, bi) => {
+    const bDone = b.items.filter((_,ii) => state.planDone.has(`${day}-b${bi}-${ii}`)).length;
+    const items = b.items.map((it, ii) => {
+      const id = `${day}-b${bi}-${ii}`;
+      const on = state.planDone.has(id);
+      return `<div class="check-item ${on?'done':''}" data-pid="${id}">
+        <span class="ci-box">✓</span>
+        <span class="ci-text">${it}</span>
+      </div>`;
+    }).join('');
+    return `<div class="block-card" data-bi="${bi}">
+      <div class="block-head">
+        <span class="block-time">${esc(b.time)}</span>
+        <span class="block-title">${esc(b.title)}</span>
+        <span class="block-cnt">${bDone}/${b.items.length}</span>
+      </div>
+      <div class="check-list">${items}</div>
+    </div>`;
+  }).join('');
+
+  const clHtml = d.checklist.map((t, i) => {
+    const id = `${day}-c${i}`;
+    const on = state.planDone.has(id);
+    return `<div class="check-item ${on?'done':''}" data-pid="${id}">
+      <span class="ci-box">✓</span>
+      <span class="ci-text">${t}</span>
+    </div>`;
+  }).join('');
+
+  view.innerHTML = `
+    <div class="plan-wrap">
+      <div class="plan-hero">
+        <h2>🗓 ${esc(d.title)}</h2>
+        <p>${esc(d.sub)}</p>
+        <div class="plan-prog-row">
+          <div class="prog-bar"><i class="plan-fill" style="width:${pct}%"></i></div>
+          <span class="plan-prog-text" id="planProgText">${doneItems}/${totalItems} · ${pct}%</span>
+        </div>
+      </div>
+
+      <div class="day-tabs" id="dayTabs">
+        ${[1,2,3].map(n =>
+          `<button data-day="${n}" class="${n===day?'active':''}">Day ${n}</button>`
+        ).join('')}
+      </div>
+
+      ${blocksHtml}
+
+      <div class="ghead"><span class="bar"></span>本日自检清单</div>
+      <div class="block-card">
+        <div class="check-list">${clHtml}</div>
+      </div>
+
+      <div class="plan-actions">
+        <button class="btn ghost" id="planResetDay">↺ 重置本日</button>
+        <button class="btn ghost" id="planResetAll">⌫ 重置全部计划</button>
+      </div>
+    </div>
+  `;
+
+  const dt = document.getElementById('dayTabs');
+  dt.onclick = e => {
+    const b = e.target.closest('[data-day]'); if(!b) return;
+    state.planDay = +b.dataset.day;
+    saveState();
+    renderPlan();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  view.querySelectorAll('[data-pid]').forEach(el => {
+    el.onclick = () => {
+      const id = el.dataset.pid;
+      if(state.planDone.has(id)) state.planDone.delete(id);
+      else state.planDone.add(id);
+      saveState();
+      el.classList.toggle('done', state.planDone.has(id));
+      updatePlanCounts();
+    };
+  });
+
+  document.getElementById('planResetDay').onclick = () => {
+    const p = day + '-';
+    [...state.planDone].forEach(id => { if(id.startsWith(p)) state.planDone.delete(id); });
+    saveState();
+    renderPlan();
+    toast('Day ' + day + ' 已重置');
+  };
+  document.getElementById('planResetAll').onclick = () => {
+    if(!state.planDone.size){ toast('计划本来就是空的'); return; }
+    state.planDone = new Set();
+    saveState();
+    renderPlan();
+    toast('三天计划已全部重置');
+  };
+}
+
+function updatePlanCounts(){
+  const day = state.planDay;
+  const d = PLAN[day];
+  if(!d) return;
+
+  const totalItems = d.blocks.reduce((s,b) => s + b.items.length, 0);
+  const doneItems = d.blocks.reduce((s,b,bi) =>
+    s + b.items.filter((_,ii) => state.planDone.has(`${day}-b${bi}-${ii}`)).length, 0);
+  const pct = totalItems ? Math.round(doneItems / totalItems * 100) : 0;
+
+  const fill = view.querySelector('.plan-fill');
+  if(fill) fill.style.width = pct + '%';
+  const txt = document.getElementById('planProgText');
+  if(txt) txt.textContent = `${doneItems}/${totalItems} · ${pct}%`;
+
+  view.querySelectorAll('.block-card[data-bi]').forEach(card => {
+    const bi = +card.dataset.bi;
+    const b = d.blocks[bi];
+    if(!b) return;
+    const cnt = card.querySelector('.block-cnt');
+    if(!cnt) return;
+    const n = b.items.filter((_,ii) => state.planDone.has(`${day}-b${bi}-${ii}`)).length;
+    cnt.textContent = `${n}/${b.items.length}`;
+  });
+}
+
+/* =========================================================
+   模式六：PDF 阅读
+   ========================================================= */
+let pdfDoc = null;
+let pdfDocToken = 0;
+let pdfFileName = '';
+let pdfNumPages = 0;
+let pdfBaseWidth = 612;
+let pdfBaseHeight = 792;
+let pdfScale = 1;
+let pdfFit = true;
+let pdfLoading = false;
+let pdfLibPromise = null;
+let pdfObserver = null;
+let pdfFileInput = null;
+let pdfResizeTimer = null;
+const pdfCache = new Map();
+const PDF_CACHE_MAX = 20;
+const PDF_CDNS = [
+  'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/',
+  'https://unpkg.com/pdfjs-dist@3.11.174/build/'
+];
+
+function loadScript(src){
+  return new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.async = true;
+    s.onload = () => res();
+    s.onerror = () => rej(new Error('script load failed: ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(pdfLibPromise) return pdfLibPromise;
+  pdfLibPromise = (async () => {
+    let lastErr = null;
+    for(const base of PDF_CDNS){
+      try{
+        await loadScript(base + 'pdf.min.js');
+        if(window.pdfjsLib){
+          try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.js'; }catch(_){}
+          return window.pdfjsLib;
+        }
+      }catch(e){ lastErr = e; }
+    }
+    pdfLibPromise = null;
+    throw lastErr || new Error('无法加载 PDF 引擎');
+  })();
+  return pdfLibPromise;
+}
+
+function pdfCacheSet(key, cv){
+  pdfCache.set(key, cv);
+  while(pdfCache.size > PDF_CACHE_MAX){
+    const k = pdfCache.keys().next().value;
+    pdfCache.delete(k);
+  }
+}
+
+function pickPdfFile(){
+  if(!pdfFileInput){
+    pdfFileInput = document.createElement('input');
+    pdfFileInput.type = 'file';
+    pdfFileInput.accept = 'application/pdf,.pdf';
+    pdfFileInput.style.display = 'none';
+    pdfFileInput.addEventListener('change', () => {
+      const f = pdfFileInput.files && pdfFileInput.files[0];
+      pdfFileInput.value = '';
+      if(f) handlePdfFile(f);
+    });
+    document.body.appendChild(pdfFileInput);
+  }
+  pdfFileInput.click();
+}
+
+async function handlePdfFile(file){
+  if(!file) return;
+  const name = file.name || 'document.pdf';
+  if(file.type && file.type !== 'application/pdf' && !/\.pdf$/i.test(name)){
+    toast('请选择 PDF 文件');
+    return;
+  }
+  if(pdfLoading) return;
+  pdfLoading = true;
+  toast('正在加载 PDF…');
+  try{
+    const lib = await loadPdfJs();
+    const buf = await file.arrayBuffer();
+    const doc = await lib.getDocument({ data: new Uint8Array(buf) }).promise;
+    const p1 = await doc.getPage(1);
+    const vp1 = p1.getViewport({ scale: 1 });
+
+    pdfDoc = doc;
+    pdfNumPages = doc.numPages;
+    pdfFileName = name;
+    pdfBaseWidth = vp1.width || 612;
+    pdfBaseHeight = vp1.height || 792;
+    pdfDocToken++;
+    pdfCache.clear();
+    pdfFit = true;
+    pdfScale = 1;
+    view.dataset.pdfSig = '';
+    view.innerHTML = '';
+    render();
+    toast('已加载 ' + pdfNumPages + ' 页');
+  }catch(err){
+    console.error(err);
+    toast('PDF 加载失败：' + (err && err.message ? err.message : '未知错误'));
+  }finally{
+    pdfLoading = false;
+  }
+}
+
+async function renderPdfPageEl(el){
+  if(!pdfDoc) return;
+  const n = +el.dataset.page;
+  const scale = +el.dataset.scale || 1;
+  const key = pdfDocToken + '|' + n + '|' + scale.toFixed(3);
+
+  if(el.dataset.done === key) return;
+
+  const cached = pdfCache.get(key);
+  if(cached){
+    el.innerHTML = '';
+    el.appendChild(cached);
+    el.dataset.done = key;
+    el.style.minHeight = '';
+    if(pdfObserver) pdfObserver.unobserve(el);
+    return;
+  }
+
+  if(el.dataset.busy === '1') return;
+  el.dataset.busy = '1';
+  try{
+    const page = await pdfDoc.getPage(n);
+    const vp = page.getViewport({ scale });
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const cv = document.createElement('canvas');
+    cv.width = Math.max(1, Math.floor(vp.width * dpr));
+    cv.height = Math.max(1, Math.floor(vp.height * dpr));
+    cv.style.width = Math.round(vp.width) + 'px';
+    cv.style.height = Math.round(vp.height) + 'px';
+
+    const ctx = cv.getContext('2d', { alpha: false });
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+
+    await page.render({
+      canvasContext: ctx,
+      viewport: vp,
+      transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined
+    }).promise;
+
+    pdfCacheSet(key, cv);
+
+    if(el.isConnected){
+      el.innerHTML = '';
+      el.appendChild(cv);
+      el.dataset.done = key;
+      el.style.minHeight = '';
+    }
+    if(pdfObserver) pdfObserver.unobserve(el);
+  }catch(err){
+    console.error(err);
+    if(el.isConnected){
+      el.innerHTML = '<div class="pdf-err">第 ' + n + ' 页渲染失败</div>';
+    }
+  }finally{
+    delete el.dataset.busy;
+  }
+}
+
+function setupPdfObserver(){
+  if(pdfObserver) pdfObserver.disconnect();
+  const pages = document.querySelectorAll('.pdf-page');
+  if(!pages.length) return;
+
+  if(!('IntersectionObserver' in window)){
+    pages.forEach(el => renderPdfPageEl(el));
+    return;
+  }
+  pdfObserver = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if(en.isIntersecting) renderPdfPageEl(en.target);
+    });
+  }, { rootMargin: '800px 0px 800px 0px', threshold: 0 });
+  pages.forEach(el => pdfObserver.observe(el));
+}
+
+function pdfApplyScale(newScale, fit){
+  pdfFit = !!fit;
+  pdfScale = Math.max(0.15, Math.min(5, newScale));
+
+  const pagesEl = document.getElementById('pdfPages');
+  if(!pagesEl){ renderPdf(); return; }
+
+  const phH = Math.round(pdfBaseHeight * pdfScale);
+  const phW = Math.round(pdfBaseWidth * pdfScale);
+
+  pagesEl.querySelectorAll('.pdf-page').forEach(el => {
+    el.dataset.scale = String(pdfScale);
+    delete el.dataset.done;
+    el.dataset.busy = '';
+    delete el.dataset.busy;
+    el.style.minHeight = phH + 'px';
+    el.innerHTML = `<div class="pdf-ph" style="width:${phW}px;height:${phH}px"></div>`;
+  });
+
+  const zv = document.getElementById('pdfZoomVal');
+  if(zv) zv.textContent = Math.round(pdfScale * 100) + '%';
+  const fb = document.getElementById('pdfFitBtn');
+  if(fb) fb.classList.toggle('on', pdfFit);
+
+  view.dataset.pdfSig = pdfDocToken + '|' + (pdfFit ? 'fit' : 'free') + '|' + pdfScale.toFixed(4);
+  setupPdfObserver();
+}
+
+function pdfFitWidth(){
+  const pagesEl = document.getElementById('pdfPages');
+  const avail = Math.max(180, (pagesEl ? pagesEl.clientWidth : view.clientWidth) - 2);
+  const s = Math.max(0.15, Math.min(4, avail / pdfBaseWidth));
+  pdfApplyScale(s, true);
+}
+
+function renderPdf(){
+  if(!pdfDoc){
+    view.dataset.pdfSig = '';
+    view.innerHTML = `
+      <div class="pdf-wrap">
+        <div class="pdf-drop" id="pdfDrop">
+          <div class="pd-ic">📄</div>
+          <h3>点击选择 PDF 文件</h3>
+          <p>也可以把 PDF 直接拖拽到本页面 · 文件只在你本机浏览器里解析，不会上传到任何服务器</p>
+          <button class="btn primary" type="button" id="pdfPickBtn">📂 选择 PDF</button>
+        </div>
+      </div>`;
+    const drop = document.getElementById('pdfDrop');
+    if(drop) drop.onclick = () => pickPdfFile();
+    return;
+  }
+
+  const sig = pdfDocToken + '|' + (pdfFit ? 'fit' : 'free') + '|' + pdfScale.toFixed(4);
+  if(view.dataset.pdfSig === sig && view.querySelector('.pdf-pages')) return;
+
+  const phH = Math.round(pdfBaseHeight * pdfScale);
+  const phW = Math.round(pdfBaseWidth * pdfScale);
+  const pages = [];
+  for(let i = 1; i <= pdfNumPages; i++){
+    pages.push(`<div class="pdf-page" data-page="${i}" data-scale="${pdfScale}">
+      <div class="pdf-ph" style="width:${phW}px;height:${phH}px"></div>
+    </div>`);
+  }
+
+  view.innerHTML = `
+    <div class="pdf-wrap">
+      <div class="pdf-bar">
+        <span class="pdf-badge">PDF</span>
+        <span class="pdf-fname" title="${esc(pdfFileName)}">${esc(pdfFileName)}</span>
+        <span class="pdf-meta">${pdfNumPages} 页</span>
+        <span class="spacer"></span>
+        <button class="tbtn ${pdfFit?'on':''}" id="pdfFitBtn" title="适应宽度">适应宽度</button>
+        <button class="icon-btn" id="pdfZoomOut" title="缩小">−</button>
+        <span class="pdf-zoom-val" id="pdfZoomVal">${Math.round(pdfScale*100)}%</span>
+        <button class="icon-btn" id="pdfZoomIn" title="放大">+</button>
+        <button class="tbtn" id="pdfChange" title="选择另一个 PDF">换文件</button>
+      </div>
+      <div class="pdf-pages" id="pdfPages">${pages.join('')}</div>
+    </div>
+  `;
+
+  const fitBtn = document.getElementById('pdfFitBtn');
+  if(fitBtn) fitBtn.onclick = () => pdfFitWidth();
+
+  const zo = document.getElementById('pdfZoomOut');
+  if(zo) zo.onclick = () => pdfApplyScale(pdfScale / 1.2, false);
+
+  const zi = document.getElementById('pdfZoomIn');
+  if(zi) zi.onclick = () => pdfApplyScale(pdfScale * 1.2, false);
+
+  const ch = document.getElementById('pdfChange');
+  if(ch) ch.onclick = () => pickPdfFile();
+
+  // 首屏按需适配 / 应用比例
+  if(pdfFit) pdfFitWidth();
+  else pdfApplyScale(pdfScale, false);
+}
+
+/* 拖拽 PDF 到页面 */
+(function bindPdfDrop(){
+  const onDragOver = e => {
+    if(state.mode !== 'pdf') return;
+    e.preventDefault();
+    const d = document.getElementById('pdfDrop');
+    if(d) d.classList.add('drag');
+  };
+  document.addEventListener('dragover', onDragOver);
+  document.addEventListener('dragenter', onDragOver);
+  document.addEventListener('dragleave', e => {
+    const d = document.getElementById('pdfDrop');
+    if(d) d.classList.remove('drag');
+  });
+  document.addEventListener('drop', e => {
+    if(state.mode !== 'pdf') return;
+    e.preventDefault();
+    const d = document.getElementById('pdfDrop');
+    if(d) d.classList.remove('drag');
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f) handlePdfFile(f);
+  });
+})();
+
+/* 窗口尺寸变化时，若处于「适应宽度」则重新计算 */
+window.addEventListener('resize', () => {
+  if(state.mode !== 'pdf' || !pdfDoc || !pdfFit) return;
+  clearTimeout(pdfResizeTimer);
+  pdfResizeTimer = setTimeout(() => {
+    if(state.mode === 'pdf' && pdfDoc && pdfFit) pdfFitWidth();
+  }, 220);
+});
+
+/* =========================================================
+   掌握 / 收藏
+   ========================================================= */
+function toggleMastered(id){
+  if(state.mastered.has(id)){ state.mastered.delete(id); toast('已取消掌握'); }
+  else { state.mastered.add(id); toast('✓ 已掌握'); }
+  saveState(); updateProg(); render();
+}
+function toggleStar(id){
+  if(state.starred.has(id)){ state.starred.delete(id); toast('已取消收藏'); }
+  else { state.starred.add(id); toast('★ 已收藏'); }
+  saveState(); render();
+}
+
+/* =========================================================
+   详情弹窗 & 编辑器
+   ========================================================= */
+const overlay = document.getElementById('overlay');
+let _editorDirty = false;
+
+function lockScroll(){
+  const gap = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.overflow = 'hidden';
+  if(gap > 0) document.body.style.paddingRight = gap + 'px';
+}
+function unlockScroll(){
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+}
+
+function openModal(id){
+  const c = byId(id); if(!c) return;
+  const done = state.mastered.has(c.id);
+  const star = state.starred.has(c.id);
+
+  overlay.innerHTML = `
+    <div class="modal">
+      <button class="mclose" id="mc">✕</button>
+      <div class="mhead">
+        <span class="mbadge">${String(c.id).padStart(2,'0')}</span>
+        <span class="mbadge g">${esc(GROUPS[c.g]||c.g)}</span>
+        ${star?'<span class="mbadge st">★</span>':''}
+        ${isEdited(c.id)?'<span class="mbadge ed">✎ 已修改</span>':''}
+      </div>
+      <h2 class="mtitle">${esc(c.en)}</h2>
+      ${state.showCN ? `<div class="men">${esc(c.cn)}</div>` : '<div style="height:14px"></div>'}
+
+      <div class="msec">
+        <div class="mlabel">English Definition</div>
+        <div class="mdef">${renderHi(c.enDef)}</div>
+      </div>
+
+      ${state.showCN ? `
+      <div class="msec">
+        <div class="mlabel">中文解释</div>
+        <div class="mcn">${esc(c.cnDef)}</div>
+      </div>
+
+      <div class="msec">
+        <div class="mlabel">记忆口诀</div>
+        <div class="mtip"><span class="ic">💡</span><span>${esc(c.tip)}</span></div>
+      </div>` : ''}
+
+      <div class="msec">
+        <div class="mlabel">Key Formula</div>
+        <div class="mfml">${esc(c.fml)}</div>
+      </div>
+
+      <div class="macts">
+        <button class="btn primary speak" data-speak-btn id="mSpeak">🔊 Read Aloud</button>
+        <button class="btn ${done?'ok':''}" id="mMaster">${done?'✓ Mastered':'标记已掌握'}</button>
+        <button class="btn ghost" id="mStar">${star?'★ 取消收藏':'☆ 收藏'}</button>
+        <button class="btn ghost" id="mEdit">✏️ 编辑内容</button>
+      </div>
+    </div>
+  `;
+  if(!overlay.classList.contains('open')){
+    lockScroll();
+    requestAnimationFrame(() => overlay.classList.add('open'));
+  }
+
+  document.getElementById('mc').onclick = closeModal;
+  document.getElementById('mSpeak').onclick = () => {
+    if(Speech.isSpeaking()){ Speech.cancel(); return; }
+    Speech.say(plainEn(c.enDef));
+  };
+  document.getElementById('mMaster').onclick = () => {
+    toggleMastered(c.id);
+    const d = state.mastered.has(c.id);
+    const b = document.getElementById('mMaster');
+    b.textContent = d ? '✓ Mastered' : '标记已掌握';
+    b.classList.toggle('ok', d);
+  };
+  document.getElementById('mStar').onclick = () => {
+    toggleStar(c.id);
+    const s = state.starred.has(c.id);
+    document.getElementById('mStar').textContent = s ? '★ 取消收藏' : '☆ 收藏';
+  };
+  document.getElementById('mEdit').onclick = () => openEditor(c.id);
+}
+
+function openEditor(id){
+  const c = byId(id); if(!c) return;
+  const edited = isEdited(id);
+
+  overlay.innerHTML = `
+    <div class="modal">
+      <button class="mclose" id="mc">✕</button>
+      <div class="mhead">
+        <span class="mbadge">${String(c.id).padStart(2,'0')}</span>
+        <span class="mbadge g">${esc(GROUPS[c.g]||c.g)}</span>
+        ${edited?'<span class="mbadge ed">✎ 已修改</span>':''}
+      </div>
+      <h2 class="mtitle">编辑概念</h2>
+      <div class="men">修改会立即在所有模式中生效，并自动保存到本机。</div>
+
+      <div class="msec">
+        <div class="edit-row">
+          <div class="edit-field">
+            <div class="edit-label">英文名 <span class="tag">en</span></div>
+            <input class="edit-input" id="e-en" value="${esc(c.en)}">
+          </div>
+          <div class="edit-field">
+            <div class="edit-label">中文名 <span class="tag">cn</span></div>
+            <input class="edit-input" id="e-cn" value="${esc(c.cn)}">
+          </div>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="edit-field">
+          <div class="edit-label">分组 <span class="tag">g</span></div>
+          <select class="edit-select" id="e-g">
+            ${Object.keys(GROUPS).map(g =>
+              `<option value="${g}"${g===c.g?' selected':''}>${g} · ${esc(GROUPS[g])}</option>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="edit-field">
+          <div class="edit-label">英文定义 <span class="tag">enDef</span></div>
+          <textarea class="edit-area" id="e-enDef" rows="5">${esc(c.enDef)}</textarea>
+          <div class="edit-hint">用 <code>**双星号**</code> 包住关键词，会被高亮、挖空、默写评分共用。</div>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="edit-field">
+          <div class="edit-label">中文解释 <span class="tag">cnDef</span></div>
+          <textarea class="edit-area" id="e-cnDef" rows="3">${esc(c.cnDef)}</textarea>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="edit-field">
+          <div class="edit-label">记忆口诀 <span class="tag">tip</span></div>
+          <textarea class="edit-area" id="e-tip" rows="2">${esc(c.tip)}</textarea>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="edit-field">
+          <div class="edit-label">公式 <span class="tag">fml</span></div>
+          <textarea class="edit-area mono" id="e-fml" rows="2">${esc(c.fml)}</textarea>
+        </div>
+      </div>
+
+      <div class="macts">
+        <button class="btn primary" id="eSave">💾 保存</button>
+        <button class="btn" id="eReset" ${edited?'':'disabled'}>↺ 恢复默认</button>
+        <button class="btn ghost" id="eCancel">取消</button>
+      </div>
+    </div>
+  `;
+  if(!overlay.classList.contains('open')){
+    lockScroll();
+    requestAnimationFrame(() => overlay.classList.add('open'));
+  }
+
+  _editorDirty = false;
+  ['e-en','e-cn','e-enDef','e-cnDef','e-tip','e-fml'].forEach(fid => {
+    const el = document.getElementById(fid);
+    if(el) el.addEventListener('input', () => { _editorDirty = true; });
+  });
+  document.getElementById('e-g').addEventListener('change', () => { _editorDirty = true; });
+
+  document.getElementById('mc').onclick = closeModal;
+  document.getElementById('eCancel').onclick = closeModal;
+
+  document.getElementById('eSave').onclick = () => {
+    const v = fid => (document.getElementById(fid).value || '').trim();
+    const patch = {
+      en:    v('e-en')    || c.en,
+      cn:    v('e-cn')    || c.cn,
+      g:     document.getElementById('e-g').value,
+      enDef: v('e-enDef') || c.enDef,
+      cnDef: v('e-cnDef'),
+      tip:   v('e-tip'),
+      fml:   v('e-fml')
+    };
+    updateConcept(id, patch);
+    _editorDirty = false;
+    render();
+    openModal(id);
+    toast('✓ 已保存并同步到所有模式');
+  };
+
+  document.getElementById('eReset').onclick = () => {
+    if(!isEdited(id)) return;
+    resetConcept(id);
+    _editorDirty = false;
+    render();
+    openEditor(id);
+    toast('已恢复为默认内容');
+  };
+}
+
+function closeModal(){
+  if(_editorDirty && !confirm('有未保存的修改，确定放弃吗？')) return;
+  _editorDirty = false;
+  overlay.classList.remove('open');
+  overlay.innerHTML = '';
+  unlockScroll();
+}
+overlay.addEventListener('click', e => {
+  if(e.target === overlay) closeModal();
+});
+
+/* =========================================================
+   快捷键
+   ========================================================= */
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ closeModal(); return; }
+  const t = e.target;
+  // 焦点在表单控件或按钮上时，交给元素自身处理，避免双重触发
+  if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' ||
+           t.tagName === 'SELECT' || t.tagName === 'BUTTON')) return;
+
+  if(state.mode === 'recall'){
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); move(-1); }
+    else if(e.key === 'ArrowRight'){ e.preventDefault(); move(1); }
+    else if(e.key === ' '){
+      e.preventDefault();
+      const fc = document.getElementById('fc');
+      if(fc) fc.click();
+    }
+    else if(e.key === 'Enter'){
+      e.preventDefault();
+      const b = document.getElementById('gotIt');
+      if(b) b.click();
+    }
+  }
+  if(state.mode === 'cloze'){
+    if(e.key === ' '){
+      e.preventDefault();
+      const b = document.getElementById('hintOne');
+      if(b) b.click();
+    }
+    else if(e.key === 'ArrowLeft'){
+      const b = document.getElementById('cPrev');
+      if(b && !b.disabled){ e.preventDefault(); b.click(); }
+    }
+    else if(e.key === 'ArrowRight'){
+      const b = document.getElementById('cNext');
+      if(b && !b.disabled){ e.preventDefault(); b.click(); }
+    }
+  }
+});
+
+/* =========================================================
+   启动
+   ========================================================= */
+document.getElementById('tabs').onclick = e => {
+  const b = e.target.closest('[data-mode]');
+  if(!b) return;
+  Speech.cancel();
+  if(b.dataset.mode !== state.mode){
+    resetSessionOrders();
+  }
+  state.mode = b.dataset.mode;
+  saveState();
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+document.getElementById('themeBtn').onclick = cycleTheme;
+document.getElementById('cnToggle').onclick = function(){
+  state.showCN = !state.showCN;
+  this.classList.toggle('on', state.showCN);
+  this.textContent = state.showCN ? '中' : 'EN';
+  saveState();
+  render();
+};
+
+(function init(){
+  loadState();
+  loadOverrides();   // 必须先于任何 render，重建 CONCEPTS
+  applyTheme();
+  const ct = document.getElementById('cnToggle');
+  ct.classList.toggle('on', state.showCN);
+  ct.textContent = state.showCN ? '中' : 'EN';
+  refreshVoiceUI();
+  render();
+})();
+</script>
+</body>
+</html>
